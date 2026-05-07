@@ -1,0 +1,188 @@
+<div class="profile-header animate__animated animate__fadeInDown">
+    <h1>
+        <span class="material-icons text-primary" style="font-size: 3rem;">account_circle</span>
+        My Profile
+    </h1>
+    <p class="text-muted">Manage your account settings and view activity logs</p>
+</div>
+
+<!-- Account Details Section -->
+<div *ngIf="account" class="modern-card animate__animated animate__fadeInUp">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>
+            <span class="material-icons text-success">badge</span>
+            Account Information
+        </h4>
+        <a routerLink="update" class="btn modern-btn btn-success">
+            <span class="material-icons">edit</span>
+            Edit Profile
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <strong>Full Name:</strong> {{ account.firstName }} {{ account.lastName }}
+                </div>
+                <div class="detail-item">
+                    <strong>Email:</strong> {{ account.email }}
+                </div>
+                <div class="detail-item">
+                    <strong>Phone:</strong> {{ account.phoneNumber }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <strong>Role:</strong> <span class="badge bg-primary">{{ account.role }}</span>
+                </div>
+                <div class="detail-item">
+                    <strong>UID:</strong> <code class="text-dark">{{ account.uid }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Logs Card -->
+<div class="modern-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>
+            <span class="material-icons text-info">history</span>
+            Activity Logs
+        </h4>
+        <button (click)="toggleActivityLogs()" class="btn modern-btn"
+            [ngClass]="showActivityLogs ? 'btn-outline-secondary' : 'btn-primary'">
+            <span class="material-icons">
+                {{ showActivityLogs ? 'visibility_off' : 'visibility' }}
+            </span>
+            {{ showActivityLogs ? 'Hide Logs' : 'View Logs' }}
+        </button>
+    </div>
+
+    <div *ngIf="showActivityLogs" class="card-body">
+        <!-- Filters -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="actionType" class="form-label">
+                    <span class="material-icons align-middle" style="font-size: 1.1rem;">search</span> Search Action
+                </label>
+                <div class="input-group">
+                    <input type="text" id="actionType" class="form-control" placeholder="e.g. Login"
+                        [(ngModel)]="searchTerm" (input)="handleSearch()" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="datetime-local" id="startDate" class="form-control" [(ngModel)]="startDate"
+                    (change)="handleSearch()" />
+            </div>
+            <div class="col-md-4">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="datetime-local" id="endDate" class="form-control" [(ngModel)]="endDate"
+                    (change)="handleSearch()" />
+            </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="scroll-container"
+            style="max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+            <table class="modern-table stack-on-mobile">
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Action Type</th>
+                        <th style="width: 50%">Details</th>
+                        <th style="width: 25%">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of filteredLogs">
+                        <td data-label="Action Type">
+                            <span class="fw-bold text-primary">{{ log.actionType }}</span>
+                        </td>
+                        <td data-label="Details" class="text-muted text-end text-md-start">{{ log.actionDetails }}</td>
+                        <td data-label="Timestamp">
+                            <span class="text-secondary" style="font-size: 0.9em;">
+                                {{ log.timestamp | date:'MMM d, y, h:mm a' }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="filteredLogs.length === 0">
+                        <td colspan="3" class="text-center py-5">
+                            <span class="material-icons text-muted"
+                                style="font-size: 3rem; opacity: 0.5;">assignment_late</span>
+                            <p class="text-muted mt-2">No activity logs found matching your criteria.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Section for All Activity Logs -->
+<div *ngIf="isAdmin()" class="modern-card border-warning animate__animated animate__fadeInUp"
+    style="animation-delay: 0.2s;">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
+        <h4 class="text-dark">
+            <span class="material-icons text-warning">admin_panel_settings</span>
+            All Activity Logs (Admin)
+        </h4>
+        <button (click)="toggleAllActivityLogs()" class="btn modern-btn btn-warning">
+            <span class="material-icons">
+                {{ showAllActivityLogs ? 'visibility_off' : 'visibility' }}
+            </span>
+            {{ showAllActivityLogs ? 'Hide All Logs' : 'View All Logs' }}
+        </button>
+    </div>
+
+    <div *ngIf="showAllActivityLogs" class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Search Actions</label>
+                <input [(ngModel)]="adminSearchTerm" (change)="handleAdminSearch()" placeholder="Search all logs..."
+                    class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                <input [(ngModel)]="adminStartDate" (change)="handleAdminSearch()" type="datetime-local"
+                    class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                <input [(ngModel)]="adminEndDate" (change)="handleAdminSearch()" type="datetime-local"
+                    class="form-control" />
+            </div>
+        </div>
+
+        <div class="scroll-container"
+            style="max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+            <table class="modern-table stack-on-mobile">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>User & Role</th>
+                        <th>Details</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of filteredAllLogs">
+                        <td data-label="Action"><span class="fw-bold">{{ log.actionType }}</span></td>
+                        <td data-label="Account ID" class="text-end text-md-start">
+                            <div class="fw-bold">ID: {{ log.accountId }}</div>
+                        </td>
+                        <td data-label="Details" class="text-muted text-end text-md-start">{{ log.actionDetails }}</td>
+                        <td data-label="Timestamp">{{ log.timestamp | date:'MMM d, y, h:mm a' }}</td>
+                    </tr>
+                    <tr *ngIf="filteredAllLogs.length === 0">
+                        <td colspan="4" class="text-center py-5">
+                            <span class="material-icons text-muted"
+                                style="font-size: 3rem; opacity: 0.5;">search_off</span>
+                            <p class="text-muted mt-2">No logs found.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

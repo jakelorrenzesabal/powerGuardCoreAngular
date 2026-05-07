@@ -1,0 +1,49 @@
+<nav class="admin-subnav navbar navbar-light bg-white border-bottom shadow-sm mb-4">
+    <div class="container-fluid px-2">
+        <div class="navbar-nav d-flex horizontal-scroll-mobile w-100 p-2">
+            <a routerLink="accounts" routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 px-3 mb-2 glass-panel border"
+                style="border-radius: 12px;">
+                <span class="material-icons me-2">group</span>
+                <span class="fw-semibold">Accounts Management</span>
+            </a>
+            <a routerLink="blocked-uids" routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 px-3 mb-2 glass-panel border"
+                style="border-radius: 12px;">
+                <span class="material-icons me-2">block</span>
+                <span class="fw-semibold">Blocked UIDs</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .admin-subnav {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .admin-subnav .nav-link {
+        color: #6c757d;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .admin-subnav .nav-link.active {
+        color: #4361ee;
+    }
+
+    .admin-subnav .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 20%;
+        right: 20%;
+        height: 3px;
+        background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+        border-radius: 3px 3px 0 0;
+    }
+
+    .admin-subnav .nav-link:hover {
+        color: #4361ee;
+    }
+</style>

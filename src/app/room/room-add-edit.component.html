@@ -1,0 +1,152 @@
+<div class="modal-header d-flex align-items-center">
+  <div class="d-flex align-items-center gap-3">
+    <div class="icon-circle bg-primary-soft">
+      <span class="material-icons text-primary">{{ mode === 'add' ? 'add_business' : 'edit_note' }}</span>
+    </div>
+    <h5 class="modal-title mb-0">{{ title }}</h5>
+  </div>
+  <button type="button" class="btn-close ms-auto" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body p-4">
+  <!-- ✅ General Server Error (Only if not field-specific) -->
+  <div *ngIf="errorMessage" class="server-error-pill mb-4 shadow-sm">
+    <span class="material-icons">warning_amber</span>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+    <div class="d-flex align-items-center gap-2">
+      <span class="material-icons">check_circle</span>
+      {{ successMessage }}
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="needs-validation">
+    <div class="row g-4">
+      <!-- Room Name -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">meeting_room</span>
+          Room Name
+        </label>
+        <div class="input-group-custom">
+          <input type="text" formControlName="roomName" class="form-control"
+            [ngClass]="{ 'is-invalid': (submitted || f.roomName.touched) && (f.roomName.errors) }"
+            placeholder="e.g. Conference Room A" />
+          <div *ngIf="(submitted || f.roomName.touched) && f.roomName.errors?.required" class="invalid-feedback">
+            Room Name is required
+          </div>
+          <div *ngIf="f.roomName.errors?.unique" class="invalid-feedback">
+            This Room Name is already taken
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Number -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">pin</span>
+          Room Number
+        </label>
+        <div class="input-group-custom">
+          <input type="number" formControlName="roomNumber" class="form-control"
+            [ngClass]="{ 'is-invalid': (submitted || f.roomNumber.touched) && f.roomNumber.errors }"
+            placeholder="e.g. 101" />
+          <div *ngIf="(submitted || f.roomNumber.touched) && f.roomNumber.errors?.required" class="invalid-feedback">
+            Room Number is required
+          </div>
+          <div *ngIf="(submitted || f.roomNumber.touched) && f.roomNumber.errors?.min" class="invalid-feedback">
+            Room Number must be at least 1
+          </div>
+          <div *ngIf="f.roomNumber.errors?.unique" class="invalid-feedback">
+            This Room Number is already taken
+          </div>
+        </div>
+      </div>
+
+      <!-- Building -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">domain</span>
+          Building
+        </label>
+        <select formControlName="building" class="form-select"
+          [ngClass]="{ 'is-invalid': (submitted || f.building.touched) && f.building.errors }">
+          <option value="">Select building</option>
+          <option value="GSC Main">GSC Main</option>
+          <option value="GSC Manila">GSC Manila</option>
+        </select>
+        <div *ngIf="(submitted || f.building.touched) && f.building.errors?.required" class="invalid-feedback">
+          Building is required
+        </div>
+      </div>
+
+      <!-- Floor -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">layers</span>
+          Floor
+        </label>
+        <select formControlName="floor" class="form-select"
+          [ngClass]="{ 'is-invalid': (submitted || f.floor.touched) && f.floor.errors }">
+          <option value="">Select floor</option>
+          <option value="1">1st Floor</option>
+          <option value="2">2nd Floor</option>
+          <option value="3">3rd Floor</option>
+          <option value="4">4th Floor</option>
+          <option value="5">5th Floor</option>
+        </select>
+        <div *ngIf="(submitted || f.floor.touched) && f.floor.errors?.required" class="invalid-feedback">
+          Floor is required
+        </div>
+      </div>
+
+      <!-- Device ID -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">router</span>
+          Device ID
+        </label>
+        <div class="input-group-custom">
+          <input type="text" formControlName="deviceId" class="form-control" [readonly]="mode === 'add'"
+            [ngClass]="{ 'is-invalid': (submitted || f.deviceId.touched) && f.deviceId.errors }"
+            placeholder="ROOM_XXX" />
+          <div *ngIf="(submitted || f.deviceId.touched) && f.deviceId.errors?.required" class="invalid-feedback">
+            Device ID is required
+          </div>
+          <div *ngIf="f.deviceId.errors?.unique" class="invalid-feedback">
+            This Device ID is already registered
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="col-md-6">
+        <label class="form-label">
+          <span class="material-icons">toggle_on</span>
+          Initial Status
+        </label>
+        <select formControlName="isActive" class="form-select"
+          [ngClass]="{ 'is-invalid': (submitted || f.isActive.touched) && f.isActive.errors }">
+          <option [ngValue]="true">Active (Online)</option>
+          <option [ngValue]="false">Inactive (Maintenance)</option>
+        </select>
+        <div *ngIf="(submitted || f.isActive.touched) && f.isActive.errors?.required" class="invalid-feedback">
+          Status is required
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-5 d-flex align-items-center justify-content-end gap-3 p-3 bg-light rounded-4">
+      <button type="button" class="btn btn-link" (click)="activeModal.dismiss()">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="submitting" class="btn btn-primary d-flex align-items-center">
+        <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+        {{ mode === 'add' ? 'Create Room' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+</div>

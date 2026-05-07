@@ -1,0 +1,154 @@
+﻿<!-- Top Navbar for User -->
+<nav *ngIf="account?.role === Role.User" class="navbar navbar-expand navbar-dark bg-dark px-3 fixed-top">
+  <div class="navbar-nav w-100">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">
+      <span class="material-icons align-middle me-1">home</span> Home
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">
+      <span class="material-icons align-middle me-1">person</span> Profile
+    </a>
+  </div>
+  <!-- Logout Button on the right -->
+  <div class="navbar-nav ms-auto">
+    <button (click)="logout()" class="btn btn-link nav-item nav-link">
+      <span class="material-icons align-middle me-1">logout</span> Logout
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Header for Admin -->
+<nav *ngIf="account?.role === Role.Admin"
+  class="navbar navbar-light bg-white d-lg-none fixed-top shadow-sm px-3 admin-navbar-mobile">
+  <div class="d-flex align-items-center">
+    <button class="navbar-toggler border-0 p-0 me-3" type="button" data-bs-toggle="offcanvas"
+      data-bs-target="#adminSidebarMobile">
+      <span class="material-icons" style="font-size: 2rem;">menu</span>
+    </button>
+    <div class="d-flex align-items-center">
+      <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 35px; width: auto;" class="me-2">
+      <span class="fw-bold text-dark h5 mb-0">PowerGuard</span>
+    </div>
+  </div>
+</nav>
+
+<div class="app-container d-flex" [ngClass]="{ 'bg-light': account }"
+  [ngStyle]="{ 'padding-top': account?.role === Role.User ? '56px' : (account?.role === Role.Admin ? '0' : '0') }">
+
+  <!-- Sidebar for Admin (Desktop) -->
+  <nav *ngIf="account?.role === Role.Admin"
+    class="d-none d-lg-flex flex-column p-3 glass-panel border-0 m-3 admin-sidebar-desktop"
+    style="position: fixed; top: 0; left: 0; width: 220px; height: calc(100vh - 32px); z-index: 1000; background: rgba(255,255,255,0.8);">
+
+    <div class="navbar-brand text-center w-100 mb-4 pb-3 border-bottom border-light">
+      <img src="assets/logo.png" alt="PowerGuard Logo" style="width: 80px; height: auto;" class="mb-2">
+      <h5 class="fw-bold mt-2 text-dark">PowerGuard</h5>
+    </div>
+
+    <div class="navbar-nav flex-column w-100 h-100 gap-2">
+      <a routerLink="/" routerLinkActive="active-nav-item" [routerLinkActiveOptions]="{exact: true}"
+        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        <span class="material-icons align-middle me-3">dashboard</span> Dashboard
+      </a>
+      <a routerLink="/profile" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        <span class="material-icons align-middle me-3">person</span> Profile
+      </a>
+      <a routerLink="/admin" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        <span class="material-icons align-middle me-3">manage_accounts</span> Accounts
+      </a>
+      <a routerLink="/rooms" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        <span class="material-icons align-middle me-3">meeting_room</span> Rooms
+      </a>
+
+      <div class="mt-auto border-top border-light pt-3">
+        <button (click)="logout()"
+          class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3">
+          <span class="material-icons align-middle me-3">logout</span> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Sidebar (Admin Offcanvas) -->
+  <div class="offcanvas offcanvas-start border-0 glass-panel m-2" tabindex="-1" id="adminSidebarMobile"
+    style="width: 280px; height: calc(100vh - 16px);">
+    <div class="offcanvas-header border-bottom">
+      <div class="d-flex align-items-center">
+        <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 30px; width: auto;" class="me-2">
+        <h5 class="offcanvas-title fw-bold" id="offcanvasExampleLabel">PowerGuard</h5>
+      </div>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-3">
+      <div class="navbar-nav flex-column w-100 h-100 gap-2">
+        <a routerLink="/" routerLinkActive="active-nav-item" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          <span class="material-icons align-middle me-3">dashboard</span> Dashboard
+        </a>
+        <a routerLink="/profile" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          <span class="material-icons align-middle me-3">person</span> Profile
+        </a>
+        <a routerLink="/admin" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          <span class="material-icons align-middle me-3">manage_accounts</span> Accounts
+        </a>
+        <a routerLink="/rooms" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          <span class="material-icons align-middle me-3">meeting_room</span> Rooms
+        </a>
+
+        <div class="mt-auto border-top border-light pt-3">
+          <button (click)="logout()" data-bs-dismiss="offcanvas"
+            class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3">
+            <span class="material-icons align-middle me-3">logout</span> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="flex-grow-1 main-content-area"
+    [ngClass]="{ 'admin-main-content': account?.role === Role.Admin, 'user-main-content': account?.role === Role.User }">
+    <!-- subnav router outlet -->
+    <router-outlet name="subnav"></router-outlet>
+
+    <!-- global alert -->
+    <alert></alert>
+
+    <div [ngClass]="{ 
+      'admin-layout': account?.role === Role.Admin, 
+      'user-layout': account?.role === Role.User 
+    }" class="d-flex flex-column min-vh-100">
+
+      <div class="flex-grow-1">
+        <!-- your router-outlets and content -->
+        <router-outlet></router-outlet>
+      </div>
+
+      <!-- Footer -->
+      <footer class="app-footer text-light mt-auto"
+        style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);">
+        <div class="container py-3">
+          <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+              <small>&copy; <span id="year"></span> POWERGUARD</small>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+              <a href="https://docs.google.com/document/d/1oZFvb7mKVDDPm583tvUGan8XnKITSkaqCEW0N4v_wac/edit?tab=t.0"
+                target="_blank" class="text-light text-decoration-none me-3">
+                <i class="material-icons align-middle">article</i> Docs
+              </a>
+              <a href="https://github.com/jakelorrenzesabal" target="_blank" class="text-light text-decoration-none">
+                <i class="material-icons align-middle">code</i> GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+
+    </div>

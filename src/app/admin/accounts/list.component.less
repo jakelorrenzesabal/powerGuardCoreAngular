@@ -1,0 +1,108 @@
+.admin-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.modern-table {
+    margin-bottom: 0;
+
+    thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        color: #495057;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        padding: 1.2rem 1rem;
+    }
+
+    tbody tr {
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgba(67, 97, 238, 0.02);
+        }
+    }
+
+    td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+}
+
+.role-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &.admin {
+        background-color: fade(#6f42c1, 10%);
+        color: #6f42c1;
+    }
+
+    &.user {
+        background-color: fade(#4361ee, 10%);
+        color: #4361ee;
+    }
+
+    .material-icons {
+        font-size: 1rem;
+    }
+}
+
+.action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-modern {
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+
+    &.btn-edit {
+        background-color: fade(#4361ee, 10%);
+        color: #4361ee;
+        border: none;
+
+        &:hover {
+            background-color: #4361ee;
+            color: white;
+        }
+    }
+
+    &.btn-deactivate {
+        background-color: fade(#ef233c, 10%);
+        color: #ef233c;
+        border: none;
+
+        &:hover {
+            background-color: #ef233c;
+            color: white;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

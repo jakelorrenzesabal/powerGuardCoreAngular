@@ -1,0 +1,206 @@
+<div class="admin-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 d-flex align-items-center">
+                <span class="material-icons text-primary me-2" style="font-size: 2rem;">group</span>
+                User Accounts
+            </h2>
+            <p class="text-muted small mb-0">Manage all registered users and their access roles</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button (click)="openInactiveModal()" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                <span class="material-icons me-2">person_off</span>
+                Inactive Accounts
+            </button>
+            <a routerLink="add" class="btn btn-primary d-inline-flex align-items-center">
+                <span class="material-icons me-2">person_add</span>
+                Create New Account
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <div class="input-group search-group">
+            <span class="input-group-text bg-white border-end-0">
+                <span class="material-icons text-muted">search</span>
+            </span>
+            <input type="text" class="form-control border-start-0 ps-0"
+                placeholder="Search by name, email, UID, or phone..." (input)="onSearch($event)" [value]="searchTerm">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table modern-table stack-on-mobile">
+            <thead>
+                <tr>
+                    <th style="width: 30%">User Information</th>
+                    <th style="width: 30%">Email Address</th>
+                    <th style="width: 20%">System Role</th>
+                    <th style="width: 20%" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let account of accounts">
+                    <td data-label="User Information">
+                        <div class="d-flex align-items-center justify-content-end justify-content-md-start">
+                            <div class="avatar-sm bg-light rounded-circle d-none d-md-flex align-items-center justify-content-center me-3"
+                                style="width: 40px; height: 40px;">
+                                <span class="material-icons text-secondary">person</span>
+                            </div>
+                            <div class="text-end text-md-start">
+                                <div class="fw-bold text-nowrap">{{account.title}} {{account.firstName}}
+                                    {{account.lastName}}</div>
+                                <div class="text-muted small">UID: {{account.uid || 'N/A'}}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Email Address">
+                        <span class="text-secondary">{{account.email}}</span>
+                    </td>
+                    <td data-label="System Role">
+                        <span class="role-badge" [ngClass]="account.role.toLowerCase()">
+                            <span class="material-icons">
+                                {{ account.role === 'Admin' ? 'admin_panel_settings' : 'person_outline' }}
+                            </span>
+                            {{account.role}}
+                        </span>
+                    </td>
+                    <td data-label="Actions" class="text-end">
+                        <div class="action-btns justify-content-center justify-content-md-end">
+                            <a routerLink="edit/{{account.accountId}}"
+                                class="btn-modern btn-edit d-inline-flex align-items-center text-decoration-none"
+                                title="Edit Account">
+                                <span class="material-icons me-1">edit</span>
+                                Edit
+                            </a>
+                            <button (click)="confirmDeactivation(account)"
+                                class="btn-modern btn-deactivate d-inline-flex align-items-center"
+                                [disabled]="account.isDeleting || (currentAccount && account.accountId === currentAccount.accountId)"
+                                title="Deactivate Account">
+                                <span *ngIf="account.isDeleting" class="spinner-border spinner-border-sm me-1"></span>
+                                <span *ngIf="!account.isDeleting" class="material-icons me-1">person_off</span>
+                                Deactivate
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="!accounts">
+                    <td colspan="4" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="accounts && accounts.length === 0">
+                    <td colspan="4" class="text-center py-5 text-muted">
+                        No accounts found.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Deactivation Confirmation Modal -->
+<div class="modal fade" id="deactivateModal" tabindex="-1" aria-labelledby="deactivateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="avatar-lg bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4"
+                    style="width: 80px; height: 80px;">
+                    <span class="material-icons" style="font-size: 3rem;">person_off</span>
+                </div>
+                <h4 class="fw-bold mb-2">Deactivate Account?</h4>
+                <p class="text-muted mb-0">You are about to deactivate account for
+                    <strong>{{selectedAccount?.firstName}} {{selectedAccount?.lastName}}</strong>.
+                </p>
+                <div class="alert alert-warning mt-3 border-0 small d-flex align-items-center"
+                    style="background-color: #fff8eb; color: #b25e09; border-radius: 12px;">
+                    <span class="material-icons me-2" style="font-size: 1.2rem;">warning</span>
+                    <span>This will automatically unselect this account from all assigned rooms.</span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-light px-4 py-2 me-2"
+                    style="border-radius: 10px; font-weight: 600;" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger px-4 py-2" style="border-radius: 10px; font-weight: 600;"
+                    (click)="deleteAccount(selectedAccount?.accountId)" data-bs-dismiss="modal">
+                    Yes, Deactivate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inactive Accounts Modal -->
+<div class="modal fade" id="inactiveAccountsModal" tabindex="-1" aria-labelledby="inactiveAccountsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header d-flex align-items-center border-bottom px-4 py-3">
+                <span class="material-icons text-muted me-2">person_off</span>
+                <h5 class="modal-title fw-bold" id="inactiveAccountsModalLabel">Inactive User Accounts</h5>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="px-4 py-3 border-bottom bg-light bg-opacity-10">
+                    <div class="input-group search-group-sm shadow-sm"
+                        style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                            <span class="material-icons text-muted" style="font-size: 1.2rem;">search</span>
+                        </span>
+                        <input type="text" class="form-control border-0 ps-0 py-2 small"
+                            placeholder="Search inactive accounts..." (input)="onInactiveSearch($event)"
+                            [value]="inactiveSearchTerm">
+                    </div>
+                </div>
+                <div *ngIf="loadingInactive" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted small mt-2">Loading inactive accounts...</p>
+                </div>
+
+                <div *ngIf="!loadingInactive && inactiveAccounts.length === 0" class="text-center py-5 text-muted">
+                    <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.2;">person_off</span>
+                    <p>No inactive accounts found.</p>
+                </div>
+
+                <div class="table-responsive" *ngIf="!loadingInactive && inactiveAccounts.length > 0">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 border-0">Name</th>
+                                <th class="border-0">Email</th>
+                                <th class="text-end px-4 border-0">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let account of inactiveAccounts">
+                                <td class="px-4 py-3 align-middle fw-semibold">{{account.firstName}}
+                                    {{account.lastName}}</td>
+                                <td class="py-3 align-middle text-muted">{{account.email}}</td>
+                                <td class="px-4 py-3 text-end align-middle">
+                                    <button (click)="reactivateAccount(account.accountId)"
+                                        class="btn btn-success btn-sm d-inline-flex align-items-center"
+                                        [disabled]="account.isReactivating" style="border-radius: 8px;">
+                                        <span *ngIf="account.isReactivating"
+                                            class="spinner-border spinner-border-sm me-1"></span>
+                                        <span *ngIf="!account.isReactivating" class="material-icons me-1"
+                                            style="font-size: 1.1rem;">person_add</span>
+                                        Reactivate
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 py-3">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"
+                    style="border-radius: 10px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

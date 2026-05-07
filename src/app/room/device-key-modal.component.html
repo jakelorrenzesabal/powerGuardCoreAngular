@@ -1,0 +1,14 @@
+<div class="modal-header">
+  <h5 class="modal-title">Device Key</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+<div class="modal-body text-center">
+  <p class="fw-bold">Your device key:</p>
+  <div class="border rounded bg-light p-3 mb-3">
+    <code>{{ deviceKey }}</code>
+  </div>
+  <small class="text-muted">Keep this key safe — you'll need it to connect the device.</small>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="activeModal.close()">OK</button>
+</div>

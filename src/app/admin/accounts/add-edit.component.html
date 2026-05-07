@@ -1,0 +1,189 @@
+﻿<div class="admin-card">
+  <div class="d-flex align-items-center mb-4">
+    <a routerLink="/admin/accounts"
+      class="btn-modern btn-edit d-inline-flex align-items-center me-3 text-decoration-none">
+      <span class="material-icons">arrow_back</span>
+    </a>
+    <h2 class="mb-0">{{ isAddMode ? 'Create New User Account' : 'Edit User Account' }}</h2>
+  </div>
+
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()" class="modern-form">
+    <!-- Section 1: Personal Information -->
+    <div class="form-section">
+      <div class="section-title">
+        <span class="material-icons">person</span>
+        Personal Information
+      </div>
+      <div class="row g-3">
+        <div class="col-md-2">
+          <label class="form-label">Title</label>
+          <select formControlName="title" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.title.errors }">
+            <option value=""></option>
+            <option value="Mr">Mr</option>
+            <option value="Mrs">Mrs</option>
+            <option value="Miss">Miss</option>
+            <option value="Ms">Ms</option>
+          </select>
+          <div *ngIf="submitted && f.title.errors" class="invalid-feedback">Title is required</div>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">First Name</label>
+          <input type="text" formControlName="firstName" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" placeholder="John" />
+          <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">First Name is required</div>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Last Name</label>
+          <input type="text" formControlName="lastName" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" placeholder="Doe" />
+          <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">Last Name is required</div>
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <label class="form-label">System Role</label>
+          <select formControlName="role" class="form-select" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
+            <option value=""></option>
+            <option value="User">User</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <div *ngIf="submitted && f.role.errors" class="invalid-feedback">Role is required</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">User UID</label>
+          <input type="text" formControlName="uid" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.uid.errors }" placeholder="Unique identifier (e.g. RFID tag)" />
+          <div *ngIf="submitted && f.uid.errors" class="invalid-feedback">A valid UID is required</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Contact Details -->
+    <div class="form-section">
+      <div class="section-title">
+        <span class="material-icons">contact_mail</span>
+        Contact Details & Access
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Email Address</label>
+          <input type="text" formControlName="email" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.email.errors }" placeholder="email@example.com" />
+          <div *ngIf="submitted && f.email.errors" class="invalid-feedback">Valid email is required</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Phone Number</label>
+          <input type="text" formControlName="phoneNumber" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.phoneNumber.errors }" placeholder="09xxxxxxxxx" />
+          <div *ngIf="submitted && f.phoneNumber.errors" class="invalid-feedback">Valid phone number is required</div>
+        </div>
+      </div>
+
+      <div class="room-selection-area mt-4">
+        <label class="form-label">Assigned Room Access</label>
+        <button type="button" class="btn btn-select-rooms w-100 d-flex align-items-center justify-content-center"
+          (click)="openRoomsModal(roomsModal)">
+          <span class="material-icons me-2">meeting_room</span>
+          Click to Authorize Rooms
+        </button>
+
+        <div class="selected-rooms-badges">
+          <div *ngIf="selectedRooms.length === 0" class="text-muted small italic">
+            No rooms authorized for this user yet.
+          </div>
+          <span *ngFor="let room of selectedRooms" class="room-badge">
+            <span class="material-icons">meeting_room</span>
+            {{ room.roomName }} ({{ room.roomNumber }})
+          </span>
+        </div>
+
+        <div *ngIf="submitted && f.roomIds.errors" class="text-danger small mt-2">
+          <div *ngIf="f.roomIds.errors.required">At least one room must be authorized</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Account Security -->
+    <div class="form-section">
+      <div class="section-title">
+        <span class="material-icons">security</span>
+        Account Security
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">{{ isAddMode ? 'Password' : 'New Password (leave blank to keep current)' }}</label>
+          <input type="password" formControlName="password" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.password.errors }" placeholder="••••••••" />
+          <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+            <div *ngIf="f.password.errors.required">Password is required</div>
+            <div *ngIf="f.password.errors.minlength">Must be at least 6 characters</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" formControlName="confirmPassword" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.confirmPassword.errors }" placeholder="••••••••" />
+          <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
+            <div *ngIf="f.confirmPassword.errors.mustMatch">Passwords must match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button [disabled]="submitting" class="btn btn-primary btn-save d-flex align-items-center">
+        <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+        <span class="material-icons me-2">save</span>
+        {{ isAddMode ? 'Create Account' : 'Save Changes' }}
+      </button>
+      <a routerLink="/admin/accounts" class="btn btn-outline-secondary d-flex align-items-center px-4"
+        style="border-radius: 10px;">
+        Cancel
+      </a>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<ng-template #roomsModal let-modal>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title d-flex align-items-center">
+        <span class="material-icons text-primary me-2">meeting_room</span>
+        Select Authorized Rooms
+      </h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body" style="max-height: 450px; overflow-y: auto;">
+      <div class="row g-2">
+        <div *ngFor="let room of rooms" class="col-md-6">
+          <div class="room-list-item border d-flex align-items-center"
+            [ngClass]="{'bg-light': isRoomSelected(room.roomId)}">
+            <div class="form-check w-100 mb-0">
+              <input class="form-check-input ms-0 me-2" type="checkbox" [id]="'room-' + room.roomId"
+                [value]="room.roomId" [checked]="isRoomSelected(room.roomId)"
+                (change)="onRoomToggle(room.roomId, $event)">
+              <label class="form-check-label w-100" [for]="'room-' + room.roomId">
+                <div class="fw-bold">{{ room.roomName }}</div>
+                <div class="text-muted small">Code: {{ room.roomNumber }}</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="rooms.length === 0" class="col-12 text-center py-4 text-muted">
+          No available rooms found in the system.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-link text-decoration-none text-muted" (click)="modal.dismiss()">Cancel</button>
+      <button class="btn btn-primary px-4" style="border-radius: 10px;" (click)="modal.close()">
+        Confirm Selection
+      </button>
+    </div>
+  </div>
+</ng-template>

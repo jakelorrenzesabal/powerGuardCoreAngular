@@ -1,0 +1,196 @@
+// Variables
+@primary-color: #4a90e2;
+@secondary-color: #6c757d;
+@success-color: #28a745;
+@info-color: #17a2b8;
+@warning-color: #ffc107;
+@danger-color: #dc3545;
+@light-bg: #f8f9fa;
+@card-bg: #ffffff;
+@text-color: #333333;
+@muted-text: #6c757d;
+@border-radius: 12px;
+@box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+.profile-header {
+    margin-bottom: 2rem;
+    text-align: center;
+
+    h1 {
+        font-weight: 700;
+        color: @text-color;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}
+
+.modern-card {
+    background: @card-bg;
+    border: none;
+    border-radius: @border-radius;
+    box-shadow: @box-shadow;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    margin-bottom: 2rem;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid fade(@muted-text, 10%);
+        padding: 1.5rem;
+        
+        h4 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: @text-color;
+        }
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+.detail-item {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: @text-color;
+
+    strong {
+        color: @secondary-color;
+        font-weight: 600;
+        width: 120px;
+        display: inline-block;
+    }
+}
+
+.modern-btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    
+    &.btn-primary {
+        background-color: @primary-color;
+        border-color: @primary-color;
+        &:hover {
+            background-color: darken(@primary-color, 10%);
+        }
+    }
+    
+    &.btn-success {
+        background-color: @success-color;
+        border-color: @success-color;
+        &:hover {
+            background-color: darken(@success-color, 10%);
+        }
+    }
+
+    .material-icons {
+        font-size: 1.2rem;
+        vertical-align: middle;
+        margin-right: 0.25rem;
+    }
+}
+
+.scroll-container {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: @light-bg;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: fade(@muted-text, 30%);
+        border-radius: 10px;
+    }
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    
+    thead {
+        th {
+            background-color: @light-bg;
+            color: @text-color;
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: 2px solid fade(@primary-color, 10%);
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            transition: background-color 0.1s;
+            
+            &:hover {
+                background-color: fade(@primary-color, 5%);
+            }
+
+            td {
+                padding: 1rem;
+                border-bottom: 1px solid fade(@muted-text, 10%);
+                color: @text-color;
+                vertical-align: middle;
+            }
+        }
+    }
+}
+
+.form-label {
+    font-weight: 500;
+    color: @secondary-color;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    border: 1px solid fade(@muted-text, 20%);
+    
+    &:focus {
+        border-color: @primary-color;
+        box-shadow: 0 0 0 3px fade(@primary-color, 20%);
+    }
+}
+
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .modern-card {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+            
+            h4 {
+                justify-content: center;
+            }
+        }
+    }
+    
+    .detail-item {
+        strong {
+            width: 100%;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+    }
+}
+

@@ -1,0 +1,104 @@
+// Variables
+@primary-color: #4a90e2;
+@secondary-color: #6c757d;
+@danger-color: #dc3545;
+@light-bg: #f8f9fa;
+@card-bg: #ffffff;
+@text-color: #333333;
+@muted-text: #6c757d;
+@border-radius: 12px;
+@box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+.update-profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.modern-card {
+    background: @card-bg;
+    border: none;
+    border-radius: @border-radius;
+    box-shadow: @box-shadow;
+    padding: 2rem;
+
+    h1 {
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: @text-color;
+        border-bottom: 2px solid fade(@primary-color, 10%);
+        padding-bottom: 1rem;
+    }
+
+    h3 {
+        color: @text-color;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+}
+
+.form-label {
+    font-weight: 500;
+    color: @text-color;
+    margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid fade(@muted-text, 20%);
+    transition: all 0.2s;
+
+    &:focus {
+        border-color: @primary-color;
+        box-shadow: 0 0 0 3px fade(@primary-color, 20%);
+    }
+}
+
+.btn-container {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.modern-btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &.btn-primary {
+        background-color: @primary-color;
+        border-color: @primary-color;
+
+        &:hover {
+            background-color: darken(@primary-color, 10%);
+        }
+    }
+
+    &.btn-danger {
+        background-color: @danger-color;
+        border-color: @danger-color;
+
+        &:hover {
+            background-color: darken(@danger-color, 10%);
+        }
+    }
+}
+
+.btn-link {
+    color: @secondary-color;
+    text-decoration: none;
+
+    &:hover {
+        color: @text-color;
+        text-decoration: underline;
+    }
+}
