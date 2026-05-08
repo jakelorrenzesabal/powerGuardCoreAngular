@@ -17,7 +17,12 @@ export class ErrorInterceptor implements HttpInterceptor {
             }
 
             const error = (err && err.error && err.error.message) || err.statusText;
-            console.error(err);
+            
+            // suppress console error for refresh token calls as they are expected when not logged in
+            if (!request.url.includes('refresh-token')) {
+                console.error(err);
+            }
+
             return throwError(() => error);
         }))
     }
