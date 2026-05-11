@@ -32,6 +32,7 @@ export class AccountService {
             .pipe(map((response: any) => {
                 const account = { ...response.account, jwtToken: response.jwtToken };
                 this.accountSubject.next(account);
+                localStorage.setItem('isLoggedIn', 'true');
                 this.startRefreshTokenTimer();
                 return account;
             }));
@@ -41,6 +42,7 @@ export class AccountService {
         this.http.post<any>(`${baseUrl}/revoke-token`, {}, { withCredentials: true }).subscribe();
         this.stopRefreshTokenTimer();
         this.accountSubject.next(null);
+        localStorage.removeItem('isLoggedIn');
         this.router.navigate(['/account/login']);
     }
 
