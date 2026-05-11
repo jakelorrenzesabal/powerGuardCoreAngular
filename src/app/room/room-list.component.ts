@@ -353,6 +353,7 @@ export class RoomListComponent implements OnInit {
           this.alertService.success('User assigned to room successfully');
           this.loadAccountsByRoom();
           this.loadUnassignedAccounts();
+          this.loadRooms(); // Refresh room card user count badges
         },
         error: (error: any) => this.alertService.error(error)
       });
@@ -374,6 +375,7 @@ export class RoomListComponent implements OnInit {
         next: () => {
           this.alertService.success('User removed from room successfully');
           this.loadAccountsByRoom();
+          this.loadRooms(); // Refresh room card user count badges
           if (this.showUnassigned) {
             this.loadUnassignedAccounts();
           }
