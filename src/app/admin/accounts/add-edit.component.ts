@@ -45,7 +45,7 @@ export class AddEditComponent implements OnInit {
       role: ['', Validators.required],
       password: [''],
       confirmPassword: [''],
-      roomIds: [[], Validators.required]
+      roomIds: [[]]
     });
 
     this.isAddMode = !this.accountId;
@@ -76,6 +76,9 @@ export class AddEditComponent implements OnInit {
             });
 
             this.selectedRooms = account.rooms || [];
+            this.form.patchValue({
+              roomIds: this.selectedRooms.map(r => r.roomId)
+            });
             this.loading = false;
           },
           error: (err: any) => {
@@ -107,9 +110,27 @@ export class AddEditComponent implements OnInit {
       this.form.patchValue({ roomIds: roomIds.filter(id => id !== roomId) });
     }
 
-    this.selectedRooms = this.rooms.filter(r =>
-      this.form.value.roomIds.includes(r.roomId)
-    );
+    const currentAssignments = this.selectedRooms;
+    this.selectedRooms = this.rooms
+      .filter(r => this.form.value.roomIds.includes(r.roomId))
+      .map(r => {
+        const existing = currentAssignments.find(ca => ca.roomId === r.roomId);
+        return { ...r, expiryDate: existing ? existing.expiryDate : null };
+      });
+  }
+
+  onExpiryChange(roomId: number, event: any) {
+    const room = this.selectedRooms.find(r => r.roomId === roomId);
+    if (room) {
+      room.expiryDate = event.target.value ? new Date(event.target.value).toISOString() : null;
+    }
+  }
+
+  getExpiryValue(expiryDate: any): string {
+    if (!expiryDate) return '';
+    const date = new Date(expiryDate);
+    // Format to yyyy-MM-ddThh:mm
+    return date.toISOString().substring(0, 16);
   }
 
   onSubmit() {
@@ -118,8 +139,17 @@ export class AddEditComponent implements OnInit {
 
     if (this.form.invalid) return;
 
-    // Remove password fields if they are empty
+    // Prepare parameters
     const params = { ...this.form.value };
+    
+    // Add room assignments with expiry
+    params.roomAssignments = this.selectedRooms.map(r => ({
+      roomId: r.roomId,
+      expiryDate: r.expiryDate
+    }));
+    delete params.roomIds;
+
+    // Remove password fields if they are empty
     if (!params.password) {
       delete params.password;
       delete params.confirmPassword;

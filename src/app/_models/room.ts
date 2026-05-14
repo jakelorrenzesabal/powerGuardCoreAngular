@@ -1,31 +1,24 @@
-// src/app/_models/room.ts
-export class Room {
-  roomId?: number;
-  roomName?: string;
-  roomNumber?: number;
-  floor?: number;
-  building?: string;
-  deviceId?: string;
+export interface Room {
+  roomId: number;
+  roomName: string;
+  roomNumber: number;
+  floor: string;
+  building: string;
+  deviceId: string;
   description?: string;
-  isActive?: boolean;
-  powerStatus?: 'on' | 'off';
-  createdAt?: string;
-  updatedAt?: string;
-
-  // UI state tracking properties
-  isToggling?: boolean;
-  isDeleting?: boolean;
-  isTogglingPower?: boolean;
-
-  // authoritative: active = online
-  isOnline?: boolean;     // optional (kept for compatibility)
-  lastSeen?: string | null;  // ISO string or null when online
-
-  // Activity properties
+  isActive: boolean;
+  powerStatus: string;
   lastAccountName?: string;
-  currentAccountName?: string;
   lastEvent?: string;
   lastEventTimestamp?: string;
-  userCount?: number;
+  currentAccountName?: string;
   isCardPresent?: boolean;
+  isAuthorized?: boolean;
+  userCount?: number;
+  
+  // UI-only properties
+  isToggling?: boolean;
+  isTogglingPower?: boolean;
+  isDeleting?: boolean;
+  isLoading?: boolean;
 }

@@ -1,0 +1,91 @@
+<div class="p-4">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-0 text-gradient">Access Requests</h1>
+                <p class="text-secondary small mb-0">Manage incoming room access requests from users</p>
+            </div>
+            <button class="btn btn-outline-primary d-flex align-items-center gap-2" (click)="loadRequests()" [disabled]="loading">
+                <span class="material-icons" [class.spinner-border]="loading" [style.font-size]="loading ? '1rem' : '1.2rem'">
+                    {{loading ? '' : 'refresh'}}
+                </span>
+                Refresh
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">User</th>
+                                <th>Room</th>
+                                <th>Type</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let request of requests" [class.opacity-50]="processingId === request.requestId">
+                                <td class="ps-4 py-3">
+                                    <div class="fw-bold">{{request.userName}}</div>
+                                    <div class="text-muted small">{{request.userEmail}}</div>
+                                </td>
+                                <td class="py-3">
+                                    <span class="fw-semibold text-primary">{{request.roomName}}</span>
+                                </td>
+                                <td class="py-3">
+                                    <span class="badge" [ngClass]="request.requestType === 'Permanent' ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'">
+                                        {{request.requestType}}
+                                    </span>
+                                    <div *ngIf="request.requestedExpiryDate" class="extra-small text-muted mt-1">
+                                        Exp: {{request.requestedExpiryDate | date:'short'}}
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="text-truncate" style="max-width: 200px;" [title]="request.reason">
+                                        {{request.reason}}
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <span class="status-pill" [ngClass]="{
+                                        'status-pending': request.status === 'Pending',
+                                        'status-approved': request.status === 'Approved',
+                                        'status-rejected': request.status === 'Rejected'
+                                    }">
+                                        {{request.status}}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4 py-3">
+                                    <div *ngIf="request.status === 'Pending'" class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm btn-success d-flex align-items-center gap-1 px-3" 
+                                                (click)="approveRequest(request.requestId)" [disabled]="processingId !== null">
+                                            <span class="material-icons" style="font-size: 1rem;">check</span>
+                                            Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 px-3" 
+                                                (click)="rejectRequest(request.requestId)" [disabled]="processingId !== null">
+                                            <span class="material-icons" style="font-size: 1rem;">close</span>
+                                            Reject
+                                        </button>
+                                    </div>
+                                    <div *ngIf="request.status !== 'Pending'" class="text-muted small">
+                                        Processed on {{request.updatedAt | date:'short'}}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!loading && requests.length === 0">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.2;">inbox</span>
+                                    <p>No access requests found.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

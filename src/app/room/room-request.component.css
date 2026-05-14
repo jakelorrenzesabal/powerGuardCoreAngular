@@ -1,0 +1,54 @@
+.request-card {
+    border-radius: 20px;
+    border: none;
+    background: #ffffff;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+}
+
+.bg-light-soft {
+    background-color: #f8f9fa;
+}
+
+.btn-outline-primary {
+    border-color: #e9ecef;
+    color: #495057;
+    background: #fff;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.btn-outline-primary:hover {
+    background: #f0f3ff;
+    border-color: #4361ee;
+    color: #4361ee;
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background: #4361ee;
+    border-color: #4361ee;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.form-control:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.1);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

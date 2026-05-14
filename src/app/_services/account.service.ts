@@ -151,8 +151,12 @@ export class AccountService {
     getUnassignedAccounts(roomId: number, search: string = '') {
         return this.http.get<any[]>(`${environment.apiUrl}/Accounts/unassigned/${roomId}?search=${search}`);
     }
-    addRoom(accountId: number, roomId: number) {
-        return this.http.post(`${environment.apiUrl}/Accounts/${accountId}/rooms/${roomId}`, {});
+    addRoom(accountId: number, roomId: number, expiryDate: string | null = null) {
+        let url = `${environment.apiUrl}/Accounts/${accountId}/rooms/${roomId}`;
+        if (expiryDate) {
+            url += `?expiryDate=${expiryDate}`;
+        }
+        return this.http.post(url, {});
     }
     removeRoom(accountId: number, roomId: number) {
         return this.http.delete(`${environment.apiUrl}/Accounts/${accountId}/rooms/${roomId}`);
