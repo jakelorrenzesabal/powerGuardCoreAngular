@@ -1,13 +1,13 @@
-
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule, FormsModule} from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { RoomsRoutingModule } from './room-routing.module';
 import { RoomListComponent } from './room-list.component';
 import { RoomAddEditComponent } from './room-add-edit.component';
-import { SharedModule } from '../shared/shared.module'; // <-- add this
+import { RoomRequestComponent } from './room-request.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     imports: [
@@ -20,7 +20,8 @@ import { SharedModule } from '../shared/shared.module'; // <-- add this
     ],
     declarations: [
         RoomListComponent,
-        RoomAddEditComponent
+        RoomAddEditComponent,
+        RoomRequestComponent
     ]
 })
 export class RoomsModule { }

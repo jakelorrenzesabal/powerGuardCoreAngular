@@ -54,6 +54,10 @@ export class RoomListComponent implements OnInit {
   accountSearchTerm = '';
   showUnassigned = false;
   accountsModal: any;
+  durationModal: any;
+  selectedAccountForAssignment: any = null;
+  assignmentDuration: 'permanent' | 'timed' = 'permanent';
+  assignmentExpiryDate: string = '';
   private accountSearchSubject: Subject<string> = new Subject<string>();
 
   constructor(
@@ -304,7 +308,10 @@ export class RoomListComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: (accounts: any[]) => {
-          this.roomAccounts = accounts;
+          this.roomAccounts = accounts.map(a => {
+            const assignment = a.rooms?.find((r: any) => r.roomId === this.selectedRoomId);
+            return { ...a, expiryDate: assignment?.expiryDate };
+          });
           this.loadingAccounts = false;
         },
         error: (error: any) => {
@@ -343,19 +350,61 @@ export class RoomListComponent implements OnInit {
       });
   }
 
-  assignAccount(accountId: number) {
+  assignAccount(account: any) {
     if (this.selectedRoomId === null) return;
+    this.selectedAccountForAssignment = account;
+    this.assignmentDuration = 'permanent';
+    this.assignmentExpiryDate = '';
 
-    this.accountService.addRoom(accountId, this.selectedRoomId)
+    // Hide the main modal to avoid stacking
+    if (this.accountsModal) {
+      this.accountsModal.hide();
+    }
+
+    const modalElement = document.getElementById('assignDurationModal');
+    if (modalElement) {
+      this.durationModal = new bootstrap.Modal(modalElement);
+      this.durationModal.show();
+    }
+  }
+
+  cancelAssignment() {
+    this.durationModal.hide();
+    if (this.accountsModal) {
+      this.accountsModal.show();
+    }
+  }
+
+  confirmAssignment() {
+    if (this.selectedRoomId === null || !this.selectedAccountForAssignment) return;
+
+    const expiryDate = this.assignmentDuration === 'timed' && this.assignmentExpiryDate 
+      ? new Date(this.assignmentExpiryDate).toISOString() 
+      : null;
+
+    this.accountService.addRoom(this.selectedAccountForAssignment.accountId, this.selectedRoomId, expiryDate)
       .pipe(first())
       .subscribe({
         next: () => {
           this.alertService.success('User assigned to room successfully');
+          this.durationModal.hide();
+          
+          // Re-show the main modal
+          if (this.accountsModal) {
+            this.accountsModal.show();
+          }
+
           this.loadAccountsByRoom();
           this.loadUnassignedAccounts();
           this.loadRooms(); // Refresh room card user count badges
         },
-        error: (error: any) => this.alertService.error(error)
+        error: (error: any) => {
+          this.alertService.error(error);
+          // Even on error, we should probably show the main modal again if the duration modal is closed
+          if (this.accountsModal) {
+            this.accountsModal.show();
+          }
+        }
       });
   }
 

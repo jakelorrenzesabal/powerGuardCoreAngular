@@ -6,8 +6,8 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { SubNavComponent } from './subnav.component';
 import { LayoutComponent } from './layout.component';
 
-
 import { BlockedUidsComponent } from './blocked-uids/blocked-uids.component';
+import { AccessRequestListComponent } from './requests/access-request-list.component';
 
 @NgModule({
     imports: [
@@ -19,8 +19,8 @@ import { BlockedUidsComponent } from './blocked-uids/blocked-uids.component';
     declarations: [
         SubNavComponent,
         LayoutComponent,
-
-        BlockedUidsComponent
+        BlockedUidsComponent,
+        AccessRequestListComponent
     ]
 })
 export class AdminModule { }

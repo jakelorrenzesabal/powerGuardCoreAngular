@@ -3,11 +3,11 @@
         <!-- Modernized Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <div>
-                <h1 class="h3 fw-bold mb-0 text-gradient">Rooms Management</h1>
-                <p class="text-secondary small mb-0">Monitor and control your secure facility rooms</p>
+                <h1 class="h3 fw-bold mb-0 text-gradient">{{ accountService.accountValue?.role === 'Admin' ? 'Rooms Management' : 'Request Room Access' }}</h1>
+                <p class="text-secondary small mb-0">{{ accountService.accountValue?.role === 'Admin' ? 'Monitor and control your secure facility rooms' : 'Select a room to request access permissions' }}</p>
             </div>
 
-            <button type="button" class="create-room-btn" (click)="openAddRoom()">
+            <button *ngIf="accountService.accountValue?.role === 'Admin'" type="button" class="create-room-btn" (click)="openAddRoom()">
                 <span class="material-icons">add_circle</span>
                 Create New Room
             </button>
@@ -20,13 +20,13 @@
                     <span class="material-icons">dashboard</span>
                     Overview
                 </button>
-                <button class="nav-pill-btn" (click)="showAllLogs()">
+                <button *ngIf="accountService.accountValue?.role === 'Admin'" class="nav-pill-btn" (click)="showAllLogs()">
                     <span class="material-icons">history</span>
                     Activity Logs
                     <span class="badge bg-primary text-white ms-2 rounded-pill" *ngIf="totalLogsCount > 0">{{
                         totalLogsCount }}</span>
                 </button>
-                <button class="nav-pill-btn" (click)="showAccountsByRoom()">
+                <button *ngIf="accountService.accountValue?.role === 'Admin'" class="nav-pill-btn" (click)="showAccountsByRoom()">
                     <span class="material-icons">group</span>
                     Room Users
                 </button>
@@ -38,6 +38,7 @@
                     [(ngModel)]="roomSearchTerm" (input)="filterRooms()" />
             </div>
         </div>
+
         <!-- Card-based layout for rooms -->
         <div class="row g-4">
             <div class="col-md-6 col-lg-4 col-xl-3" *ngFor="let room of filteredRooms">
@@ -93,7 +94,7 @@
                         </div>
 
                         <!-- Power Control Panel -->
-                        <div class="power-status-panel">
+                        <div class="power-status-panel" *ngIf="room.isAuthorized">
                             <div class="d-flex align-items-center">
                                 <span class="material-icons me-2"
                                     [ngStyle]="{'color': room.powerStatus === 'on' ? '#4361ee' : '#8d99ae'}">
@@ -112,8 +113,17 @@
                             </button>
                         </div>
 
+                        <!-- Request Access Panel -->
+                        <div class="request-access-panel mt-2" *ngIf="!room.isAuthorized && accountService.accountValue?.role !== 'Admin'">
+                            <button class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-3 shadow-sm"
+                                [routerLink]="['/rooms/request', room.roomId]">
+                                <span class="material-icons">add_moderator</span>
+                                Request Access
+                            </button>
+                        </div>
+
                         <!-- Attempts Shortcut -->
-                        <div class="d-grid mt-2">
+                        <div *ngIf="accountService.accountValue?.role === 'Admin'" class="d-grid mt-2">
                             <button
                                 class="btn btn-sm btn-light border d-flex justify-content-between align-items-center rounded-pill px-3"
                                 (click)="openAttemptsModal(room)">
@@ -133,7 +143,7 @@
                             <span *ngIf="room.isActive">Active now</span>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="action-icon-btn position-relative" (click)="showRoomLogs(room.roomId!)"
+                            <button *ngIf="accountService.accountValue?.role === 'Admin'" class="action-icon-btn position-relative" (click)="showRoomLogs(room.roomId!)"
                                 title="Logs">
                                 <span class="material-icons small">history</span>
                                 <span
@@ -142,7 +152,7 @@
                                     {{ roomLogCounts[String(room.roomId)] }}
                                 </span>
                             </button>
-                            <button class="action-icon-btn" (click)="openEditRoom(room)" title="Edit">
+                            <button *ngIf="accountService.accountValue?.role === 'Admin'" class="action-icon-btn" (click)="openEditRoom(room)" title="Edit">
                                 <span class="material-icons small">edit</span>
                             </button>
                         </div>
@@ -160,245 +170,317 @@
                 <div class="alert alert-info">No rooms found</div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Room Logs Modal -->
-        <div class="modal fade" id="roomLogsModal" tabindex="-1" aria-labelledby="roomLogsModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header d-flex align-items-center">
-                        <span class="material-icons text-primary me-2">history</span>
-                        <h5 class="modal-title" id="roomLogsModalLabel">{{logsTitle}}</h5>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Advanced Filters -->
-                        <div class="filter-section p-3 mb-4 rounded-3 bg-light border-0">
-                            <div class="row g-3">
-                                <!-- Room Name Filter (only for 'all' view) -->
-                                <div class="col-md-4" *ngIf="currentLogView === 'all'">
-                                    <label class="form-label">Filter by Room</label>
-                                    <div class="search-box-wrapper w-100">
-                                        <span class="material-icons">meeting_room</span>
-                                        <input type="text" class="form-control" [(ngModel)]="logsFilter.roomName"
-                                            placeholder="Room name..." />
-                                    </div>
-                                </div>
-
-                                <!-- Event Filter -->
-                                <div [class]="currentLogView === 'all' ? 'col-md-8' : 'col-12'">
-                                    <label class="form-label">Filter by Event Type</label>
-                                    <div class="search-box-wrapper w-100">
-                                        <span class="material-icons">event_note</span>
-                                        <input type="text" class="form-control" [(ngModel)]="logsFilter.event"
-                                            placeholder="e.g., room_activated, card_validated..." />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mt-1">
-                                <!-- Start Date/Time -->
-                                <div class="col-md-5">
-                                    <label class="form-label">From Date & Time</label>
-                                    <div class="input-group">
-                                        <input type="date" class="form-control" [(ngModel)]="logsFilter.startDate">
-                                        <input type="time" class="form-control" [(ngModel)]="logsFilter.startTime">
-                                    </div>
-                                </div>
-
-                                <!-- End Date/Time -->
-                                <div class="col-md-5">
-                                    <label class="form-label">To Date & Time</label>
-                                    <div class="input-group">
-                                        <input type="date" class="form-control" [(ngModel)]="logsFilter.endDate">
-                                        <input type="time" class="form-control" [(ngModel)]="logsFilter.endTime">
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button
-                                        class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center"
-                                        (click)="applyLogsFilter()" style="border-radius: 12px; height: 42px;">
-                                        <span *ngIf="loadingLogs" class="spinner-border spinner-border-sm me-2"></span>
-                                        <span *ngIf="!loadingLogs" class="material-icons me-1"
-                                            style="font-size: 1.2rem;">filter_alt</span>
-                                        <span *ngIf="!loadingLogs">Apply</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-end mt-2">
-                                <button
-                                    class="btn btn-link btn-sm text-muted text-decoration-none d-flex align-items-center"
-                                    (click)="resetLogsFilter(); applyLogsFilter()">
-                                    <span class="material-icons me-1" style="font-size: 1rem;">restart_alt</span>
-                                    Reset All Filters
-                                </button>
+<!-- Room Logs Modal -->
+<div class="modal fade" id="roomLogsModal" tabindex="-1" aria-labelledby="roomLogsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center">
+                <span class="material-icons text-primary me-2">history</span>
+                <h5 class="modal-title" id="roomLogsModalLabel">{{logsTitle}}</h5>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Advanced Filters -->
+                <div class="filter-section p-3 mb-4 rounded-3 bg-light border-0">
+                    <div class="row g-3">
+                        <!-- Room Name Filter (only for 'all' view) -->
+                        <div class="col-md-4" *ngIf="currentLogView === 'all'">
+                            <label class="form-label">Filter by Room</label>
+                            <div class="search-box-wrapper w-100">
+                                <span class="material-icons">meeting_room</span>
+                                <input type="text" class="form-control" [(ngModel)]="logsFilter.roomName"
+                                    placeholder="Room name..." />
                             </div>
                         </div>
 
-                        <!-- Empty State -->
-                        <div *ngIf="!loadingLogs && (!logs || logs.length === 0)" class="text-center py-5 text-muted">
-                            <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.2;">search_off</span>
-                            <p>No activity logs match your current filters.</p>
-                        </div>
-
-                        <!-- Logs Table -->
-                        <div *ngIf="logs && logs.length > 0" class="modal-table table-responsive">
-                            <div class="scroll-container" style="max-height: 400px; overflow-y: auto;">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 50px;">#</th>
-                                            <th>User & Room</th>
-                                            <th>Event Activity</th>
-                                            <th>Timestamp</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let log of logs; let i = index">
-                                            <td class="text-muted fw-bold"
-                                                style="font-size: 0.8rem; vertical-align: middle;">
-                                                {{ i + 1 }}
-                                            </td>
-                                            <td>
-                                                <div class="fw-bold">{{log.userName}}</div>
-                                                <div class="text-primary small">
-                                                    <span class="material-icons"
-                                                        style="font-size: 0.8rem; vertical-align: middle;">meeting_room</span>
-                                                    {{log.roomName}}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="event-type mb-1">
-                                                    <span class="badge rounded-pill" [ngClass]="{
-                                                    'bg-success-subtle text-success': log.event.includes('activated') || log.event.includes('on'),
-                                                    'bg-danger-subtle text-danger': log.event.includes('deactivated') || log.event.includes('off'),
-                                                    'bg-primary-subtle text-primary': !log.event.includes('activated') && !log.event.includes('deactivated')
-                                                }" style="font-size: 0.7rem; text-transform: uppercase;">
-                                                        {{log.event.replace('_', ' ')}}
-                                                    </span>
-                                                </div>
-                                                <div class="text-muted extra-small" style="font-size: 0.8rem;">
-                                                    {{log.details}}</div>
-                                            </td>
-                                            <td>
-                                                <div class="text-dark small">{{log.timestamp | date:'mediumDate'}}</div>
-                                                <div class="text-muted smaller">{{log.timestamp | date:'shortTime'}}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <!-- Event Filter -->
+                        <div [class]="currentLogView === 'all' ? 'col-md-8' : 'col-12'">
+                            <label class="form-label">Filter by Event Type</label>
+                            <div class="search-box-wrapper w-100">
+                                <span class="material-icons">event_note</span>
+                                <input type="text" class="form-control" [(ngModel)]="logsFilter.event"
+                                    placeholder="e.g., room_activated, card_validated..." />
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
-                            style="border-radius: 10px;">Close Logs</button>
+
+                    <div class="row g-3 mt-1">
+                        <!-- Start Date/Time -->
+                        <div class="col-md-5">
+                            <label class="form-label">From Date & Time</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" [(ngModel)]="logsFilter.startDate">
+                                <input type="time" class="form-control" [(ngModel)]="logsFilter.startTime">
+                            </div>
+                        </div>
+
+                        <!-- End Date/Time -->
+                        <div class="col-md-5">
+                            <label class="form-label">To Date & Time</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" [(ngModel)]="logsFilter.endDate">
+                                <input type="time" class="form-control" [(ngModel)]="logsFilter.endTime">
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button
+                                class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center"
+                                (click)="applyLogsFilter()" style="border-radius: 12px; height: 42px;">
+                                <span *ngIf="loadingLogs" class="spinner-border spinner-border-sm me-2"></span>
+                                <span *ngIf="!loadingLogs" class="material-icons me-1"
+                                    style="font-size: 1.2rem;">filter_alt</span>
+                                <span *ngIf="!loadingLogs">Apply</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-2">
+                        <button
+                            class="btn btn-link btn-sm text-muted text-decoration-none d-flex align-items-center"
+                            (click)="resetLogsFilter(); applyLogsFilter()">
+                            <span class="material-icons me-1" style="font-size: 1rem;">restart_alt</span>
+                            Reset All Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div *ngIf="!loadingLogs && (!logs || logs.length === 0)" class="text-center py-5 text-muted">
+                    <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.2;">search_off</span>
+                    <p>No activity logs match your current filters.</p>
+                </div>
+
+                <!-- Logs Table -->
+                <div *ngIf="logs && logs.length > 0" class="modal-table table-responsive">
+                    <div class="scroll-container" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>User & Room</th>
+                                    <th>Event Activity</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let log of logs; let i = index">
+                                    <td class="text-muted fw-bold"
+                                        style="font-size: 0.8rem; vertical-align: middle;">
+                                        {{ i + 1 }}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{log.userName}}</div>
+                                        <div class="text-primary small">
+                                            <span class="material-icons"
+                                                style="font-size: 0.8rem; vertical-align: middle;">meeting_room</span>
+                                            {{log.roomName}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="event-type mb-1">
+                                            <span class="badge rounded-pill" [ngClass]="{
+                                            'bg-success-subtle text-success': log.event.includes('activated') || log.event.includes('on'),
+                                            'bg-danger-subtle text-danger': log.event.includes('deactivated') || log.event.includes('off'),
+                                            'bg-primary-subtle text-primary': !log.event.includes('activated') && !log.event.includes('deactivated')
+                                        }" style="font-size: 0.7rem; text-transform: uppercase;">
+                                                {{log.event.replace('_', ' ')}}
+                                            </span>
+                                        </div>
+                                        <div class="text-muted extra-small" style="font-size: 0.8rem;">
+                                            {{log.details}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-dark small">{{log.timestamp | date:'mediumDate'}}</div>
+                                        <div class="text-muted smaller">{{log.timestamp | date:'shortTime'}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
+                    style="border-radius: 10px;">Close Logs</button>
+            </div>
         </div>
-        <!-- Accounts by Room Modal -->
-        <div class="modal fade" id="accountsByRoomModal" tabindex="-1" aria-labelledby="accountsByRoomModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header d-flex align-items-center">
-                        <span class="material-icons text-primary me-2">group</span>
-                        <h5 class="modal-title" id="accountsByRoomModalLabel">Room Users Management</h5>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+    </div>
+</div>
+
+<!-- Accounts by Room Modal -->
+<div class="modal fade" id="accountsByRoomModal" tabindex="-1" aria-labelledby="accountsByRoomModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center">
+                <span class="material-icons text-primary me-2">group</span>
+                <h5 class="modal-title" id="accountsByRoomModalLabel">Room Users Management</h5>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Room Selection Grid (Just like Account Management) -->
+                <div class="mb-4">
+                    <label class="form-label">Choose a Room to View Authorized Users</label>
+
+                    <!-- Modal Search Box -->
+                    <div class="search-box-wrapper mb-3 w-100">
+                        <span class="material-icons">search</span>
+                        <input type="text" class="form-control border-0 shadow-none"
+                            placeholder="Search rooms..." [(ngModel)]="modalRoomSearchTerm" />
                     </div>
-                    <div class="modal-body">
-                        <!-- Room Selection Grid (Just like Account Management) -->
-                        <div class="mb-4">
-                            <label class="form-label">Choose a Room to View Authorized Users</label>
 
-                            <!-- Modal Search Box -->
-                            <div class="search-box-wrapper mb-3 w-100">
-                                <span class="material-icons">search</span>
-                                <input type="text" class="form-control border-0 shadow-none"
-                                    placeholder="Search rooms..." [(ngModel)]="modalRoomSearchTerm" />
-                            </div>
-
-                            <div class="scroll-container mb-4"
-                                style="max-height: 250px; overflow-y: auto; padding: 2px;">
-                                <div class="room-selection-grid mb-0">
-                                    <div *ngFor="let room of modalFilteredRooms" class="room-select-item"
-                                        [class.active]="selectedRoomId === room.roomId"
-                                        (click)="selectRoom(room.roomId!)">
-                                        <div class="d-flex align-items-center justify-content-between w-100">
-                                            <div class="d-flex align-items-center">
-                                                <span class="material-icons me-2"
-                                                    [class.text-primary]="selectedRoomId === room.roomId">
-                                                    {{ selectedRoomId === room.roomId ? 'check_circle' : 'meeting_room'
-                                                    }}
-                                                </span>
-                                                <div>
-                                                    <div class="room-name">{{room.roomName}}</div>
-                                                    <div class="room-info">#{{room.roomNumber}} | {{room.floor}}FL</div>
-                                                </div>
-                                            </div>
-                                            <!-- Authorized User Count for Modal -->
-                                            <div class="text-primary small fw-bold d-flex align-items-center gap-1"
-                                                *ngIf="room.userCount !== undefined">
-                                                <span class="material-icons" style="font-size: 0.9rem;">group</span>
-                                                {{ room.userCount || 0 }}
-                                            </div>
+                    <div class="scroll-container mb-4"
+                        style="max-height: 250px; overflow-y: auto; padding: 2px;">
+                        <div class="room-selection-grid mb-0">
+                            <div *ngFor="let room of modalFilteredRooms" class="room-select-item"
+                                [class.active]="selectedRoomId === room.roomId"
+                                (click)="selectRoom(room.roomId!)">
+                                <div class="d-flex align-items-center justify-content-between w-100">
+                                    <div class="d-flex align-items-center">
+                                        <span class="material-icons me-2"
+                                            [class.text-primary]="selectedRoomId === room.roomId">
+                                            {{ selectedRoomId === room.roomId ? 'check_circle' : 'meeting_room'
+                                            }}
+                                        </span>
+                                        <div>
+                                            <div class="room-name">{{room.roomName}}</div>
+                                            <div class="room-info">#{{room.roomNumber}} | {{room.floor}}FL</div>
                                         </div>
+                                    </div>
+                                    <!-- Authorized User Count for Modal -->
+                                    <div class="text-primary small fw-bold d-flex align-items-center gap-1"
+                                        *ngIf="room.userCount !== undefined">
+                                        <span class="material-icons" style="font-size: 0.9rem;">group</span>
+                                        {{ room.userCount || 0 }}
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Loading Spinner -->
-                        <div *ngIf="loadingAccounts" class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status"></div>
-                            <p class="text-muted small mt-2">Fetching authorized users...</p>
+                <!-- Loading Spinner -->
+                <div *ngIf="loadingAccounts" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted small mt-2">Fetching authorized users...</p>
+                </div>
+
+                <!-- Accounts Table -->
+                <div *ngIf="!loadingAccounts && roomAccounts?.length" class="modal-table">
+                    <div class="scroll-container" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name & Contact</th>
+                                    <th>System Role</th>
+                                    <th>Auth UID</th>
+                                    <th>Access Expiry</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let account of roomAccounts">
+                                    <td>
+                                        <div class="fw-bold">{{account.firstName}} {{account.lastName}}</div>
+                                        <div class="text-muted small">
+                                            <span class="material-icons"
+                                                style="font-size: 0.8rem; vertical-align: middle;">email</span>
+                                            {{account.email}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="role-badge"
+                                            [ngClass]="account.role === 'Admin' ? 'role-admin' : 'role-user'">
+                                            {{account.role}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="uid-badge">{{account.uid}}</span>
+                                    </td>
+                                    <td>
+                                        <span *ngIf="!account.expiryDate"
+                                            class="badge bg-success-subtle text-success">Permanent</span>
+                                        <span *ngIf="account.expiryDate"
+                                            class="badge bg-warning-subtle text-warning">
+                                            {{account.expiryDate | date:'medium'}}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button *ngIf="account.role !== 'Admin'"
+                                            (click)="unassignAccount(account)"
+                                            class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                                            <span class="material-icons me-1"
+                                                style="font-size: 1rem;">person_remove</span>
+                                            Unselect
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Users Section -->
+                <div *ngIf="selectedRoomId" class="mt-4 border-top pt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0 fw-bold d-flex align-items-center">
+                            <span class="material-icons text-primary me-2">person_add</span>
+                            Assign More Users
+                        </h6>
+                        <button class="btn btn-sm"
+                            [ngClass]="showUnassigned ? 'btn-outline-secondary' : 'btn-primary'"
+                            (click)="toggleShowUnassigned()">
+                            {{ showUnassigned ? 'Hide' : 'Show' }} Unassigned Users
+                        </button>
+                    </div>
+
+                    <div *ngIf="showUnassigned">
+                        <div class="mb-3">
+                            <div class="search-box-wrapper w-100">
+                                <span class="material-icons">search</span>
+                                <input type="text" class="form-control"
+                                    placeholder="Search by name, email or UID..."
+                                    (input)="onAccountSearch($event)">
+                            </div>
                         </div>
 
-                        <!-- Accounts Table -->
-                        <div *ngIf="!loadingAccounts && roomAccounts?.length" class="modal-table">
+                        <div *ngIf="loadingUnassigned" class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary"></div>
+                        </div>
+
+                        <div *ngIf="!loadingUnassigned && unassignedAccounts?.length" class="modal-table">
                             <div class="scroll-container" style="max-height: 300px; overflow-y: auto;">
-                                <table class="table table-hover">
+                                <table class="table table-hover table-sm">
                                     <thead>
                                         <tr>
-                                            <th>Name & Contact</th>
-                                            <th>System Role</th>
-                                            <th>Auth UID</th>
+                                            <th>User</th>
+                                            <th>UID</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let account of roomAccounts">
+                                        <tr *ngFor="let account of unassignedAccounts">
                                             <td>
-                                                <div class="fw-bold">{{account.firstName}} {{account.lastName}}</div>
-                                                <div class="text-muted small">
-                                                    <span class="material-icons"
-                                                        style="font-size: 0.8rem; vertical-align: middle;">email</span>
-                                                    {{account.email}}
-                                                </div>
+                                                <div class="fw-bold small">{{account.firstName}}
+                                                    {{account.lastName}}</div>
+                                                <div class="text-muted extra-small">{{account.email}}</div>
                                             </td>
-                                            <td>
-                                                <span class="role-badge"
-                                                    [ngClass]="account.role === 'Admin' ? 'role-admin' : 'role-user'">
-                                                    {{account.role}}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="uid-badge">{{account.uid}}</span>
-                                            </td>
+                                            <td><span class="uid-badge small">{{account.uid}}</span></td>
                                             <td class="text-end">
-                                                <button *ngIf="account.role !== 'Admin'"
-                                                    (click)="unassignAccount(account)"
-                                                    class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                                                <button (click)="assignAccount(account)"
+                                                    class="btn btn-sm btn-primary py-0 px-2 d-inline-flex align-items-center">
                                                     <span class="material-icons me-1"
-                                                        style="font-size: 1rem;">person_remove</span>
-                                                    Unselect
+                                                        style="font-size: 0.9rem;">check</span>
+                                                    Select
                                                 </button>
                                             </td>
                                         </tr>
@@ -407,91 +489,76 @@
                             </div>
                         </div>
 
-                        <!-- Add Users Section -->
-                        <div *ngIf="selectedRoomId" class="mt-4 border-top pt-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0 fw-bold d-flex align-items-center">
-                                    <span class="material-icons text-primary me-2">person_add</span>
-                                    Assign More Users
-                                </h6>
-                                <button class="btn btn-sm"
-                                    [ngClass]="showUnassigned ? 'btn-outline-secondary' : 'btn-primary'"
-                                    (click)="toggleShowUnassigned()">
-                                    {{ showUnassigned ? 'Hide' : 'Show' }} Unassigned Users
-                                </button>
-                            </div>
-
-                            <div *ngIf="showUnassigned">
-                                <div class="mb-3">
-                                    <div class="search-box-wrapper w-100">
-                                        <span class="material-icons">search</span>
-                                        <input type="text" class="form-control"
-                                            placeholder="Search by name, email or UID..."
-                                            (input)="onAccountSearch($event)">
-                                    </div>
-                                </div>
-
-                                <div *ngIf="loadingUnassigned" class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary"></div>
-                                </div>
-
-                                <div *ngIf="!loadingUnassigned && unassignedAccounts?.length" class="modal-table">
-                                    <div class="scroll-container" style="max-height: 300px; overflow-y: auto;">
-                                        <table class="table table-hover table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>User</th>
-                                                    <th>UID</th>
-                                                    <th class="text-end">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr *ngFor="let account of unassignedAccounts">
-                                                    <td>
-                                                        <div class="fw-bold small">{{account.firstName}}
-                                                            {{account.lastName}}</div>
-                                                        <div class="text-muted extra-small">{{account.email}}</div>
-                                                    </td>
-                                                    <td><span class="uid-badge small">{{account.uid}}</span></td>
-                                                    <td class="text-end">
-                                                        <button (click)="assignAccount(account.accountId)"
-                                                            class="btn btn-sm btn-primary py-0 px-2 d-inline-flex align-items-center">
-                                                            <span class="material-icons me-1"
-                                                                style="font-size: 0.9rem;">check</span>
-                                                            Select
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div *ngIf="!loadingUnassigned && unassignedAccounts?.length === 0"
-                                    class="text-center py-3 text-muted small">
-                                    No matching unassigned users found.
-                                </div>
-                            </div>
+                        <div *ngIf="!loadingUnassigned && unassignedAccounts?.length === 0"
+                            class="text-center py-3 text-muted small">
+                            No matching unassigned users found.
                         </div>
-
-                        <!-- No Accounts Message -->
-                        <div *ngIf="!loadingAccounts && (!roomAccounts || roomAccounts.length === 0) && selectedRoomId"
-                            class="alert alert-info border-0 bg-light d-flex align-items-center">
-                            <span class="material-icons me-2">info</span>
-                            No users have been authorized for this room yet.
-                        </div>
-
-                        <!-- No Selection Message -->
-                        <div *ngIf="!selectedRoomId" class="text-center py-5 text-muted">
-                            <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.3;">meeting_room</span>
-                            <p>Select a room from the dropdown above to view its authorized users.</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
-                            style="border-radius: 10px;">Close Window</button>
                     </div>
                 </div>
+
+                <!-- No Accounts Message -->
+                <div *ngIf="!loadingAccounts && (!roomAccounts || roomAccounts.length === 0) && selectedRoomId"
+                    class="alert alert-info border-0 bg-light d-flex align-items-center">
+                    <span class="material-icons me-2">info</span>
+                    No users have been authorized for this room yet.
+                </div>
+
+                <!-- No Selection Message -->
+                <div *ngIf="!selectedRoomId" class="text-center py-5 text-muted">
+                    <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.3;">meeting_room</span>
+                    <p>Select a room from the dropdown above to view its authorized users.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
+                    style="border-radius: 10px;">Close Window</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Duration Modal -->
+<div class="modal fade" id="assignDurationModal" tabindex="-1" aria-labelledby="assignDurationModalLabel"
+    aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="assignDurationModalLabel">Access Duration</h6>
+                <button type="button" class="btn-close" (click)="cancelAssignment()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">Set how long
+                    <strong>{{selectedAccountForAssignment?.firstName}}</strong> should have access.
+                </p>
+
+                <div class="mb-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="duration" id="permanent" value="permanent"
+                            [(ngModel)]="assignmentDuration">
+                        <label class="form-check-label small fw-bold" for="permanent">
+                            Permanent Access
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="duration" id="timed" value="timed"
+                            [(ngModel)]="assignmentDuration">
+                        <label class="form-check-label small fw-bold" for="timed">
+                            Timed Access
+                        </label>
+                    </div>
+                </div>
+
+                <div *ngIf="assignmentDuration === 'timed'" class="animate__animated animate__fadeIn">
+                    <label class="form-label extra-small text-uppercase fw-bold text-muted">Expires on:</label>
+                    <input type="datetime-local" class="form-control form-control-sm mb-3"
+                        [(ngModel)]="assignmentExpiryDate" style="border-radius: 8px;">
+                </div>
+
+                <button class="btn btn-primary w-100 py-2 mt-2" (click)="confirmAssignment()"
+                    [disabled]="assignmentDuration === 'timed' && !assignmentExpiryDate"
+                    style="border-radius: 12px; font-weight: 600;">
+                    Confirm Selection
+                </button>
             </div>
         </div>
     </div>

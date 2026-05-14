@@ -1,0 +1,86 @@
+<div class="p-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card request-card shadow-lg border-0 overflow-hidden">
+                    <div class="card-header bg-gradient-primary text-white p-4">
+                        <div class="d-flex align-items-center">
+                            <span class="material-icons me-2" style="font-size: 2rem;">vpn_key</span>
+                            <div>
+                                <h1 class="h4 fw-bold mb-0">Request Room Access</h1>
+                                <p class="mb-0 opacity-75 small">Submit a request to the administrator</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 bg-light-soft">
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Room</label>
+                                <div class="p-3 bg-white border rounded-3 d-flex align-items-center">
+                                    <span class="material-icons text-primary me-2">meeting_room</span>
+                                    <span class="fw-semibold">{{roomName || 'Loading room info...'}}</span>
+                                </div>
+                                <input type="hidden" formControlName="roomId">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Access Type</label>
+                                <div class="d-flex gap-3">
+                                    <div class="flex-fill">
+                                        <input type="radio" class="btn-check" id="type-timed" formControlName="requestType" value="TimeLimited">
+                                        <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-1" for="type-timed">
+                                            <span class="material-icons">timer</span>
+                                            <span class="fw-bold">Time Limited</span>
+                                        </label>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <input type="radio" class="btn-check" id="type-permanent" formControlName="requestType" value="Permanent">
+                                        <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-1" for="type-permanent">
+                                            <span class="material-icons">all_inclusive</span>
+                                            <span class="fw-bold">Permanent</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 animate-fade-in" *ngIf="f.requestType.value === 'TimeLimited'">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Access Expiry</label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <span class="material-icons text-muted">event_available</span>
+                                    </span>
+                                    <input type="datetime-local" formControlName="requestedExpiryDate" class="form-control border-start-0 ps-0" 
+                                           [ngClass]="{ 'is-invalid': submitted && f.requestedExpiryDate.errors }">
+                                </div>
+                                <div *ngIf="submitted && f.requestedExpiryDate.errors" class="invalid-feedback d-block">
+                                    Expiry date is required for time-limited access.
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Reason for Access</label>
+                                <textarea formControlName="reason" class="form-control shadow-sm" rows="4" 
+                                          placeholder="Please explain why you need access to this room..."
+                                          [ngClass]="{ 'is-invalid': submitted && f.reason.errors }" style="border-radius: 12px;"></textarea>
+                                <div *ngIf="submitted && f.reason.errors" class="invalid-feedback">
+                                    Reason is required.
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 pt-2">
+                                <button type="button" class="btn btn-light flex-fill py-3 fw-bold" routerLink="/rooms" style="border-radius: 12px;">
+                                    Cancel
+                                </button>
+                                <button type="submit" [disabled]="loading" class="btn btn-primary flex-fill py-3 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                                    <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+                                    <span class="material-icons" *ngIf="!loading">send</span>
+                                    Submit Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

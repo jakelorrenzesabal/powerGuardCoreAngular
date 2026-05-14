@@ -1,32 +1,46 @@
-﻿<!-- Top Navbar for User -->
-<nav *ngIf="account?.role === Role.User" class="navbar navbar-expand navbar-dark bg-dark px-3 fixed-top">
-  <div class="navbar-nav w-100">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">
-      <span class="material-icons align-middle me-1">home</span> Home
+<!-- Top Navbar for User -->
+<nav *ngIf="account?.role === Role.User" class="navbar navbar-expand navbar-dark bg-dark px-3 fixed-top shadow-sm">
+  <div class="navbar-nav w-100 align-items-center">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link d-flex align-items-center">
+      <span class="material-icons me-1">home</span> Home
     </a>
-    <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">
-      <span class="material-icons align-middle me-1">person</span> Profile
+    <a routerLink="/rooms" routerLinkActive="active" class="nav-item nav-link d-flex align-items-center">
+      <span class="material-icons me-1">add_moderator</span> Request Access
     </a>
-  </div>
-  <!-- Logout Button on the right -->
-  <div class="navbar-nav ms-auto">
-    <button (click)="logout()" class="btn btn-link nav-item nav-link">
-      <span class="material-icons align-middle me-1">logout</span> Logout
-    </button>
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link d-flex align-items-center">
+      <span class="material-icons me-1">person</span> Profile
+    </a>
+    
+    <!-- Logout Button on the right -->
+    <div class="ms-auto d-flex align-items-center">
+      <button (click)="logout()" class="btn btn-link nav-item nav-link d-flex align-items-center text-light opacity-75 hover-opacity-100">
+        <span class="material-icons me-1">logout</span> Logout
+      </button>
+    </div>
   </div>
 </nav>
 
 <!-- Mobile Header for Admin -->
 <nav *ngIf="account?.role === Role.Admin"
   class="navbar navbar-light bg-white d-lg-none fixed-top shadow-sm px-3 admin-navbar-mobile">
-  <div class="d-flex align-items-center">
-    <button class="navbar-toggler border-0 p-0 me-3" type="button" data-bs-toggle="offcanvas"
-      data-bs-target="#adminSidebarMobile">
-      <span class="material-icons" style="font-size: 2rem;">menu</span>
-    </button>
+  <div class="d-flex align-items-center justify-content-between w-100">
     <div class="d-flex align-items-center">
-      <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 35px; width: auto;" class="me-2">
-      <span class="fw-bold text-dark h5 mb-0">PowerGuard</span>
+      <button class="navbar-toggler border-0 p-0 me-3" type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#adminSidebarMobile">
+        <span class="material-icons" style="font-size: 2rem;">menu</span>
+      </button>
+      <div class="d-flex align-items-center">
+        <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 35px; width: auto;" class="me-2">
+        <span class="fw-bold text-dark h5 mb-0">PowerGuard</span>
+      </div>
+    </div>
+    
+    <!-- Quick notification icon for mobile -->
+    <div class="position-relative" routerLink="/admin/access-requests">
+      <span class="material-icons text-primary">notifications</span>
+      <span *ngIf="pendingRequestsCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+        {{pendingRequestsCount}}
+      </span>
     </div>
   </div>
 </nav>
@@ -37,34 +51,51 @@
   <!-- Sidebar for Admin (Desktop) -->
   <nav *ngIf="account?.role === Role.Admin"
     class="d-none d-lg-flex flex-column p-3 glass-panel border-0 m-3 admin-sidebar-desktop"
-    style="position: fixed; top: 0; left: 0; width: 220px; height: calc(100vh - 32px); z-index: 1000; background: rgba(255,255,255,0.8);">
+    style="position: fixed; top: 0; left: 0; width: 240px; height: calc(100vh - 32px); z-index: 1000; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05);">
 
     <div class="navbar-brand text-center w-100 mb-4 pb-3 border-bottom border-light">
-      <img src="assets/logo.png" alt="PowerGuard Logo" style="width: 80px; height: auto;" class="mb-2">
-      <h5 class="fw-bold mt-2 text-dark">PowerGuard</h5>
+      <img src="assets/logo.png" alt="PowerGuard Logo" style="width: 70px; height: auto;" class="mb-2">
+      <h5 class="fw-bold mt-2 text-dark" style="letter-spacing: 1px;">POWERGUARD</h5>
+      <span class="badge bg-primary-subtle text-primary extra-small text-uppercase px-2 py-1">Administrator</span>
     </div>
 
     <div class="navbar-nav flex-column w-100 h-100 gap-2">
       <a routerLink="/" routerLinkActive="active-nav-item" [routerLinkActiveOptions]="{exact: true}"
-        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary transition-all">
         <span class="material-icons align-middle me-3">dashboard</span> Dashboard
       </a>
-      <a routerLink="/profile" routerLinkActive="active-nav-item"
-        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
-        <span class="material-icons align-middle me-3">person</span> Profile
-      </a>
-      <a routerLink="/admin" routerLinkActive="active-nav-item"
-        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+      
+      <div class="nav-label small text-uppercase text-muted fw-bold mt-3 mb-1 px-3" style="font-size: 0.65rem;">Management</div>
+      
+      <a routerLink="/admin/accounts" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary transition-all">
         <span class="material-icons align-middle me-3">manage_accounts</span> Accounts
       </a>
       <a routerLink="/rooms" routerLinkActive="active-nav-item"
-        class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary">
+        class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary transition-all">
         <span class="material-icons align-middle me-3">meeting_room</span> Rooms
+      </a>
+      
+      <a routerLink="/admin/access-requests" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center justify-content-between rounded-3 px-3 py-2 text-secondary transition-all">
+        <div class="d-flex align-items-center">
+            <span class="material-icons align-middle me-3">add_moderator</span> Requests
+        </div>
+        <span *ngIf="pendingRequestsCount > 0" class="badge rounded-pill bg-danger animate__animated animate__pulse animate__infinite">
+            {{pendingRequestsCount}}
+        </span>
+      </a>
+
+      <div class="nav-label small text-uppercase text-muted fw-bold mt-3 mb-1 px-3" style="font-size: 0.65rem;">Settings</div>
+      
+      <a routerLink="/profile" routerLinkActive="active-nav-item"
+        class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary transition-all">
+        <span class="material-icons align-middle me-3">person</span> Profile
       </a>
 
       <div class="mt-auto border-top border-light pt-3">
         <button (click)="logout()"
-          class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3">
+          class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3 py-2 text-decoration-none hover-bg-danger-subtle rounded-3">
           <span class="material-icons align-middle me-3">logout</span> Logout
         </button>
       </div>
@@ -73,36 +104,45 @@
 
   <!-- Mobile Sidebar (Admin Offcanvas) -->
   <div class="offcanvas offcanvas-start border-0 glass-panel m-2" tabindex="-1" id="adminSidebarMobile"
-    style="width: 280px; height: calc(100vh - 16px);">
-    <div class="offcanvas-header border-bottom">
+    style="width: 280px; height: calc(100vh - 16px); border-radius: 20px;">
+    <div class="offcanvas-header border-bottom p-4">
       <div class="d-flex align-items-center">
-        <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 30px; width: auto;" class="me-2">
+        <img src="assets/logo.png" alt="PowerGuard Logo" style="height: 35px; width: auto;" class="me-2">
         <h5 class="offcanvas-title fw-bold" id="offcanvasExampleLabel">PowerGuard</h5>
       </div>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body d-flex flex-column p-3">
+    <div class="offcanvas-body d-flex flex-column p-4">
       <div class="navbar-nav flex-column w-100 h-100 gap-2">
         <a routerLink="/" routerLinkActive="active-nav-item" [routerLinkActiveOptions]="{exact: true}"
-          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary" data-bs-dismiss="offcanvas">
           <span class="material-icons align-middle me-3">dashboard</span> Dashboard
         </a>
-        <a routerLink="/profile" routerLinkActive="active-nav-item"
-          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
-          <span class="material-icons align-middle me-3">person</span> Profile
-        </a>
-        <a routerLink="/admin" routerLinkActive="active-nav-item"
-          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+        <a routerLink="/admin/accounts" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary" data-bs-dismiss="offcanvas">
           <span class="material-icons align-middle me-3">manage_accounts</span> Accounts
         </a>
         <a routerLink="/rooms" routerLinkActive="active-nav-item"
-          class="nav-item nav-link d-flex align-items-center rounded px-3 text-secondary" data-bs-dismiss="offcanvas">
+          class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary" data-bs-dismiss="offcanvas">
           <span class="material-icons align-middle me-3">meeting_room</span> Rooms
+        </a>
+        <a routerLink="/admin/access-requests" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center justify-content-between rounded-3 px-3 py-2 text-secondary" data-bs-dismiss="offcanvas">
+          <div class="d-flex align-items-center">
+            <span class="material-icons align-middle me-3">add_moderator</span> Requests
+          </div>
+          <span *ngIf="pendingRequestsCount > 0" class="badge rounded-pill bg-danger">
+            {{pendingRequestsCount}}
+          </span>
+        </a>
+        <a routerLink="/profile" routerLinkActive="active-nav-item"
+          class="nav-item nav-link d-flex align-items-center rounded-3 px-3 py-2 text-secondary" data-bs-dismiss="offcanvas">
+          <span class="material-icons align-middle me-3">person</span> Profile
         </a>
 
         <div class="mt-auto border-top border-light pt-3">
           <button (click)="logout()" data-bs-dismiss="offcanvas"
-            class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3">
+            class="btn btn-link nav-item nav-link d-flex align-items-center text-danger w-100 px-3 py-2 text-decoration-none">
             <span class="material-icons align-middle me-3">logout</span> Logout
           </button>
         </div>
@@ -112,7 +152,8 @@
 
   <!-- Main content area -->
   <div class="flex-grow-1 main-content-area"
-    [ngClass]="{ 'admin-main-content': account?.role === Role.Admin, 'user-main-content': account?.role === Role.User }">
+    [ngClass]="{ 'admin-main-content': account?.role === Role.Admin, 'user-main-content': account?.role === Role.User }"
+    [ngStyle]="{ 'margin-left': (account?.role === Role.Admin && windowWidth >= 992) ? '240px' : '0' }">
     <!-- subnav router outlet -->
     <router-outlet name="subnav"></router-outlet>
 
@@ -135,7 +176,7 @@
         <div class="container py-3">
           <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-              <small>&copy; <span id="year"></span> POWERGUARD</small>
+              <small>&copy; {{ currentYear }} POWERGUARD SECURITY SYSTEMS</small>
             </div>
             <div class="col-md-6 text-center text-md-end">
               <a href="https://docs.google.com/document/d/1oZFvb7mKVDDPm583tvUGan8XnKITSkaqCEW0N4v_wac/edit?tab=t.0"
@@ -149,6 +190,6 @@
           </div>
         </div>
       </footer>
-
-
     </div>
+  </div>
+</div>

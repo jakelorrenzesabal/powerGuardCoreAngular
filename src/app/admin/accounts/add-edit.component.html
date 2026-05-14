@@ -1,4 +1,4 @@
-﻿<div class="admin-card">
+<div class="admin-card">
   <div class="d-flex align-items-center mb-4">
     <a routerLink="/admin/accounts"
       class="btn-modern btn-edit d-inline-flex align-items-center me-3 text-decoration-none">
@@ -87,18 +87,46 @@
           Click to Authorize Rooms
         </button>
 
-        <div class="selected-rooms-badges">
-          <div *ngIf="selectedRooms.length === 0" class="text-muted small italic">
+        <div class="selected-rooms-list mt-3">
+          <div *ngIf="selectedRooms.length === 0"
+            class="text-muted small italic text-center p-3 border rounded bg-light">
             No rooms authorized for this user yet.
           </div>
-          <span *ngFor="let room of selectedRooms" class="room-badge">
-            <span class="material-icons">meeting_room</span>
-            {{ room.roomName }} ({{ room.roomNumber }})
-          </span>
-        </div>
 
-        <div *ngIf="submitted && f.roomIds.errors" class="text-danger small mt-2">
-          <div *ngIf="f.roomIds.errors.required">At least one room must be authorized</div>
+          <div *ngFor="let room of selectedRooms"
+            class="room-assignment-card border rounded p-3 mb-2 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center">
+                <span class="material-icons text-primary me-2">meeting_room</span>
+                <div>
+                  <div class="fw-bold">{{ room.roomName }}</div>
+                  <div class="text-muted small">Code: {{ room.roomNumber }}</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-danger border-0"
+                (click)="onRoomToggle(room.roomId, {target: {checked: false}})">
+                <span class="material-icons" style="font-size: 18px;">delete</span>
+              </button>
+            </div>
+            <div class="expiry-setting mt-2 pt-2 border-top">
+              <label class="form-label small text-muted mb-1">Access Duration</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons" style="font-size: 16px;">schedule</span>
+                </span>
+                <input type="datetime-local" class="form-control" [value]="getExpiryValue(room.expiryDate)"
+                  (change)="onExpiryChange(room.roomId, $event)" placeholder="Permanent access if blank">
+                <button type="button" class="btn btn-outline-secondary"
+                  (click)="onExpiryChange(room.roomId, {target: {value: ''}})" title="Clear expiry (Permanent)">
+                  Permanent
+                </button>
+              </div>
+              <div class="form-text x-small mt-1">
+                {{ room.expiryDate ? 'Access expires at ' + (room.expiryDate | date:'medium') : 'Permanent access
+                granted' }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
