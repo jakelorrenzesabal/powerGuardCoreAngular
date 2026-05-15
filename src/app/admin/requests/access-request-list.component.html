@@ -13,13 +13,32 @@
             </button>
         </div>
 
+        <div class="row mb-3 g-3">
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <span class="input-group-text bg-white border-0"><span class="material-icons text-muted" style="font-size: 1.2rem;">search</span></span>
+                    <input type="text" class="form-control border-0 ps-0 shadow-none" placeholder="Search by room or user..." [(ngModel)]="searchTerm">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <select class="form-select shadow-sm border-0" style="border-radius: 12px;" [(ngModel)]="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Expired">Expired</option>
+                </select>
+            </div>
+        </div>
+
         <div class="card border-0 shadow-sm" style="border-radius: 15px;">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">User</th>
+                    <div class="scroll-container" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th class="ps-4">User</th>
                                 <th>Room</th>
                                 <th>Type</th>
                                 <th>Reason</th>
@@ -28,7 +47,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let request of requests" [class.opacity-50]="processingId === request.requestId">
+                            <tr *ngFor="let request of filteredRequests" [class.opacity-50]="processingId === request.requestId">
                                 <td class="ps-4 py-3">
                                     <div class="fw-bold">{{request.userName}}</div>
                                     <div class="text-muted small">{{request.userEmail}}</div>
@@ -53,7 +72,8 @@
                                     <span class="status-pill" [ngClass]="{
                                         'status-pending': request.status === 'Pending',
                                         'status-approved': request.status === 'Approved',
-                                        'status-rejected': request.status === 'Rejected'
+                                        'status-rejected': request.status === 'Rejected',
+                                        'status-expired': request.status === 'Expired'
                                     }">
                                         {{request.status}}
                                     </span>
@@ -76,7 +96,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr *ngIf="!loading && requests.length === 0">
+                            <tr *ngIf="!loading && filteredRequests.length === 0">
                                 <td colspan="6" class="text-center py-5 text-muted">
                                     <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.2;">inbox</span>
                                     <p>No access requests found.</p>
@@ -84,6 +104,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

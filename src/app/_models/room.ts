@@ -15,7 +15,7 @@ export interface Room {
   isCardPresent?: boolean;
   isAuthorized?: boolean;
   userCount?: number;
-  
+
   // UI-only properties
   isToggling?: boolean;
   isTogglingPower?: boolean;

@@ -50,6 +50,7 @@
                                         <span class="material-icons text-muted">event_available</span>
                                     </span>
                                     <input type="datetime-local" formControlName="requestedExpiryDate" class="form-control border-start-0 ps-0" 
+                                           [min]="minDateTime"
                                            [ngClass]="{ 'is-invalid': submitted && f.requestedExpiryDate.errors }">
                                 </div>
                                 <div *ngIf="submitted && f.requestedExpiryDate.errors" class="invalid-feedback d-block">

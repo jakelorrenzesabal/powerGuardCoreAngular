@@ -11,6 +11,22 @@ export class AccessRequestListComponent implements OnInit {
     requests: AccessRequest[] = [];
     loading = false;
     processingId: number | null = null;
+    searchTerm = '';
+    filterStatus = '';
+
+    get filteredRequests() {
+        return this.requests.filter(r => {
+            const matchesStatus = this.filterStatus ? r.status === this.filterStatus : true;
+            const term = this.searchTerm.toLowerCase();
+            const matchesSearch = term ? (
+                r.roomName?.toLowerCase().includes(term) ||
+                r.userName?.toLowerCase().includes(term) ||
+                r.userEmail?.toLowerCase().includes(term) ||
+                r.status.toLowerCase().includes(term)
+            ) : true;
+            return matchesStatus && matchesSearch;
+        });
+    }
 
     constructor(
         private accessRequestService: AccessRequestService,
