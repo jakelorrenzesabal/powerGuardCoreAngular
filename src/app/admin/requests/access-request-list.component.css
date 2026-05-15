@@ -28,6 +28,11 @@
     color: #c62828;
 }
 
+.status-expired {
+    background-color: #e0e0e0;
+    color: #757575;
+}
+
 .extra-small {
     font-size: 0.7rem;
 }

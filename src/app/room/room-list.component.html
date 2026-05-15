@@ -99,7 +99,7 @@
                         </div>
 
                         <!-- Power Control Panel -->
-                        <div class="power-status-panel" *ngIf="room.isAuthorized">
+                        <div class="power-status-panel" *ngIf="accountService.accountValue?.role === 'Admin'">
                             <div class="d-flex align-items-center">
                                 <span class="material-icons me-2"
                                     [ngStyle]="{'color': room.powerStatus === 'on' ? '#4361ee' : '#8d99ae'}">
@@ -120,14 +120,14 @@
 
                         <!-- Request Access Panel -->
                         <div class="request-access-panel mt-2"
-                            *ngIf="!room.isAuthorized && accountService.accountValue?.role !== 'Admin'">
+                            *ngIf="accountService.accountValue?.role !== 'Admin'">
                             <button
                                 class="btn w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-3 shadow-sm"
-                                [ngClass]="pendingRoomIds.has(room.roomId!) ? 'btn-secondary' : 'btn-primary'"
+                                [ngClass]="pendingRoomIds.has(room.roomId!) ? 'btn-secondary' : (room.isAuthorized ? 'btn-outline-primary mt-1' : 'btn-primary')"
                                 [disabled]="pendingRoomIds.has(room.roomId!)"
                                 [routerLink]="pendingRoomIds.has(room.roomId!) ? null : ['/rooms/request', room.roomId]">
-                                <span class="material-icons">{{ pendingRoomIds.has(room.roomId!) ? 'hourglass_empty' : 'add_moderator' }}</span>
-                                {{ pendingRoomIds.has(room.roomId!) ? 'Pending Request' : 'Request Access' }}
+                                <span class="material-icons">{{ pendingRoomIds.has(room.roomId!) ? 'hourglass_empty' : (room.isAuthorized ? 'update' : 'add_moderator') }}</span>
+                                {{ pendingRoomIds.has(room.roomId!) ? 'Pending Request' : (room.isAuthorized ? 'Extend Access' : 'Request Access') }}
                             </button>
                         </div>
 

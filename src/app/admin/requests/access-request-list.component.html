@@ -26,6 +26,7 @@
                     <option value="Pending">Pending</option>
                     <option value="Approved">Approved</option>
                     <option value="Rejected">Rejected</option>
+                    <option value="Expired">Expired</option>
                 </select>
             </div>
         </div>
@@ -70,7 +71,8 @@
                                     <span class="status-pill" [ngClass]="{
                                         'status-pending': request.status === 'Pending',
                                         'status-approved': request.status === 'Approved',
-                                        'status-rejected': request.status === 'Rejected'
+                                        'status-rejected': request.status === 'Rejected',
+                                        'status-expired': request.status === 'Expired'
                                     }">
                                         {{request.status}}
                                     </span>

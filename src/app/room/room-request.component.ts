@@ -15,6 +15,7 @@ export class RoomRequestComponent implements OnInit {
     roomName?: string;
     loading = false;
     submitted = false;
+    minDateTime = '';
 
     constructor(
         private formBuilder: FormBuilder,
@@ -28,6 +29,11 @@ export class RoomRequestComponent implements OnInit {
 
     ngOnInit() {
         this.id = Number(this.route.snapshot.params['id']);
+
+        // Set minimum datetime for the input to now (local timezone)
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        this.minDateTime = now.toISOString().slice(0, 16);
 
         this.form = this.formBuilder.group({
             roomId: [this.id, Validators.required],
