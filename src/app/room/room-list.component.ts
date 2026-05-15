@@ -4,7 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 declare var bootstrap: any;
 
-import { AlertService, AccountService } from '@app/_services';
+import { AlertService, AccountService, AccessRequestService } from '@app/_services';
 import { RoomService, RoomLog } from '@app/_services/room.service';
 import { Room } from '@app/_models/room';
 import { RoomAddEditComponent } from './room-add-edit.component';
@@ -18,7 +18,7 @@ export class RoomListComponent implements OnInit {
   filteredRooms: Room[] = [];
   roomSearchTerm = '';
   modalRoomSearchTerm = '';
-
+  pendingRoomIds = new Set<number>();
 
   selectedRoom: any;
   attempts: any[] = [];
@@ -64,12 +64,14 @@ export class RoomListComponent implements OnInit {
     private roomService: RoomService,
     private alertService: AlertService,
     public accountService: AccountService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private accessRequestService: AccessRequestService
   ) { }
 
   ngOnInit() {
     this.loadRooms();
     this.loadAllLogsCount();
+    this.loadPendingRequests();
 
     this.accountSearchSubject.pipe(
       debounceTime(300),
@@ -78,6 +80,20 @@ export class RoomListComponent implements OnInit {
       this.accountSearchTerm = searchTerm;
       this.loadUnassignedAccounts();
     });
+  }
+
+  private loadPendingRequests() {
+    if (this.accountService.accountValue?.role !== 'Admin') {
+      this.accessRequestService.getMyRequests()
+        .pipe(first())
+        .subscribe({
+          next: (requests: any[]) => {
+            const pending = requests.filter(r => r.status === 'Pending');
+            this.pendingRoomIds = new Set(pending.map(r => r.roomId));
+          },
+          error: (error: any) => console.error('Error loading pending requests:', error)
+        });
+    }
   }
 
   private loadAllLogsCount() {
