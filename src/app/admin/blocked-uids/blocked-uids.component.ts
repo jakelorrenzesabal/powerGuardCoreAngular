@@ -11,7 +11,9 @@ import { first } from 'rxjs/operators';
 export class BlockedUidsComponent implements OnInit {
     blockedUids: any[] = [];
     filteredBlockedUids: any[] = [];
-    searchTerm = '';
+    private _searchTerm = sessionStorage.getItem('bul_searchTerm') || '';
+    get searchTerm() { return this._searchTerm; }
+    set searchTerm(value: string) { this._searchTerm = value; sessionStorage.setItem('bul_searchTerm', value); this.filterUids(); }
     loading = false;
 
     constructor(

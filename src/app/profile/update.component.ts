@@ -41,6 +41,23 @@ export class UpdateComponent implements OnInit {
         }, {
             validator: MustMatch('password', 'confirmPassword')
         });
+
+        const savedForm = sessionStorage.getItem('profileUpdateForm');
+        if (savedForm) {
+            try {
+                const parsed = JSON.parse(savedForm);
+                delete parsed.password;
+                delete parsed.confirmPassword;
+                this.form.patchValue(parsed);
+            } catch (e) {}
+        }
+
+        this.form.valueChanges.subscribe(val => {
+            const toSave = { ...val };
+            delete toSave.password;
+            delete toSave.confirmPassword;
+            sessionStorage.setItem('profileUpdateForm', JSON.stringify(toSave));
+        });
     }
 
     // convenience getter for easy access to form fields
@@ -62,6 +79,7 @@ export class UpdateComponent implements OnInit {
             .pipe(first())
             .subscribe({
                 next: () => {
+                    sessionStorage.removeItem('profileUpdateForm');
                     this.alertService.success('Update successful', { keepAfterRouteChange: true });
                     this.router.navigate(['../'], { relativeTo: this.route });
                 },

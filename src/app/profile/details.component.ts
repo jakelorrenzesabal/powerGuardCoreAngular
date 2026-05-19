@@ -13,14 +13,37 @@ export class DetailsComponent implements OnInit {
     filteredLogs: ActivityLog[] = [];
     allActivityLogs: ActivityLog[] = [];
     filteredAllLogs: ActivityLog[] = [];
-    showActivityLogs = false;
-    showAllActivityLogs = false;
-    searchTerm: string = '';
-    startDate: string = '';
-    endDate: string = '';
-    adminSearchTerm: string = '';
-    adminStartDate: string = '';
-    adminEndDate: string = '';
+    private _showActivityLogs = sessionStorage.getItem('pd_showActivityLogs') === 'true';
+    get showActivityLogs() { return this._showActivityLogs; }
+    set showActivityLogs(value: boolean) { this._showActivityLogs = value; sessionStorage.setItem('pd_showActivityLogs', String(value)); }
+
+    private _showAllActivityLogs = sessionStorage.getItem('pd_showAllActivityLogs') === 'true';
+    get showAllActivityLogs() { return this._showAllActivityLogs; }
+    set showAllActivityLogs(value: boolean) { this._showAllActivityLogs = value; sessionStorage.setItem('pd_showAllActivityLogs', String(value)); }
+
+    private _searchTerm = sessionStorage.getItem('pd_searchTerm') || '';
+    get searchTerm() { return this._searchTerm; }
+    set searchTerm(value: string) { this._searchTerm = value; sessionStorage.setItem('pd_searchTerm', value); this.handleSearch(); }
+
+    private _startDate = sessionStorage.getItem('pd_startDate') || '';
+    get startDate() { return this._startDate; }
+    set startDate(value: string) { this._startDate = value; sessionStorage.setItem('pd_startDate', value); this.handleSearch(); }
+
+    private _endDate = sessionStorage.getItem('pd_endDate') || '';
+    get endDate() { return this._endDate; }
+    set endDate(value: string) { this._endDate = value; sessionStorage.setItem('pd_endDate', value); this.handleSearch(); }
+
+    private _adminSearchTerm = sessionStorage.getItem('pd_adminSearchTerm') || '';
+    get adminSearchTerm() { return this._adminSearchTerm; }
+    set adminSearchTerm(value: string) { this._adminSearchTerm = value; sessionStorage.setItem('pd_adminSearchTerm', value); this.handleAdminSearch(); }
+
+    private _adminStartDate = sessionStorage.getItem('pd_adminStartDate') || '';
+    get adminStartDate() { return this._adminStartDate; }
+    set adminStartDate(value: string) { this._adminStartDate = value; sessionStorage.setItem('pd_adminStartDate', value); this.handleAdminSearch(); }
+
+    private _adminEndDate = sessionStorage.getItem('pd_adminEndDate') || '';
+    get adminEndDate() { return this._adminEndDate; }
+    set adminEndDate(value: string) { this._adminEndDate = value; sessionStorage.setItem('pd_adminEndDate', value); this.handleAdminSearch(); }
 
     constructor(
         private accountService: AccountService
@@ -30,13 +53,16 @@ export class DetailsComponent implements OnInit {
         if (this.account?.accountId) {
             this.getActivityLogs(this.account.accountId);
         }
+        if (this.isAdmin() && this.showAllActivityLogs) {
+            this.getAllActivityLogs();
+        }
     }
 
     getActivityLogs(accountId: number): void {
         this.accountService.getActivityLogs(accountId).subscribe(
             (logs) => {
                 this.activityLogs = logs;
-                this.filteredLogs = logs; // Initialize filtered logs
+                this.handleSearch(); // apply persistent filters
             },
             (error) => {
                 console.error('Error fetching activity logs:', error);
@@ -62,7 +88,7 @@ export class DetailsComponent implements OnInit {
         this.accountService.getAllActivityLogs().subscribe({
             next: (logs: ActivityLog[]) => {
                 this.allActivityLogs = logs;
-                this.filteredAllLogs = logs;
+                this.handleAdminSearch(); // apply persistent filters
             },
             error: (error) => {
                 console.error('Error fetching activity logs:', error);
@@ -88,7 +114,7 @@ export class DetailsComponent implements OnInit {
 
     toggleAllActivityLogs(): void {
         if (!this.showAllActivityLogs) {
-            this.getAllActivityLogs();  // Fetch the logs only when toggled
+            this.getAllActivityLogs();
         }
         this.showAllActivityLogs = !this.showAllActivityLogs;
     }

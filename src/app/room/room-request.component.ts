@@ -49,6 +49,19 @@ export class RoomRequestComponent implements OnInit {
             reason: ['', Validators.required]
         });
 
+        const savedData = sessionStorage.getItem('roomRequestForm');
+        if (savedData) {
+            try {
+                this.form.patchValue(JSON.parse(savedData));
+            } catch (e) {
+                console.error('Could not parse saved form data', e);
+            }
+        }
+
+        this.form.valueChanges.subscribe(val => {
+            sessionStorage.setItem('roomRequestForm', JSON.stringify(val));
+        });
+
         this.fetchingRooms = true;
         this.roomService.getAllRooms()
             .pipe(first())
@@ -57,8 +70,9 @@ export class RoomRequestComponent implements OnInit {
                     this.rooms = rooms;
                     this.fetchingRooms = false;
                     
-                    if (this.id) {
-                        const room = this.rooms.find(r => r.roomId === this.id);
+                    const selectedRoomId = this.form.get('roomId')?.value || this.id;
+                    if (selectedRoomId) {
+                        const room = this.rooms.find(r => r.roomId === Number(selectedRoomId));
                         if (room) {
                             this.roomName = room.roomName;
                             this.selectRoom(room);
@@ -144,6 +158,7 @@ export class RoomRequestComponent implements OnInit {
             .pipe(first())
             .subscribe({
                 next: () => {
+                    sessionStorage.removeItem('roomRequestForm');
                     this.alertService.success('Access request submitted successfully', { keepAfterRouteChange: true });
                     this.router.navigate(['/rooms']);
                 },

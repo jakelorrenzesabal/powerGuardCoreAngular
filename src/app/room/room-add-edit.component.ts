@@ -41,16 +41,27 @@ export class RoomAddEditComponent implements OnInit {
     });
     // ✅ Auto-fill deviceId only when adding
     if (this.mode === 'add') {
-      this.roomService.getAllRooms().subscribe((rooms: any[]) => {
-        const ids = rooms
-          .map(r => r.deviceId)
-          .filter((id: string) => /^ROOM_\d+$/.test(id))
-          .map((id: string) => parseInt(id.split('_')[1], 10));
+      const savedForm = sessionStorage.getItem('roomAddEditForm');
+      if (savedForm) {
+        try {
+          this.form.patchValue(JSON.parse(savedForm));
+        } catch (e) {}
+      } else {
+        this.roomService.getAllRooms().subscribe((rooms: any[]) => {
+          const ids = rooms
+            .map(r => r.deviceId)
+            .filter((id: string) => /^ROOM_\d+$/.test(id))
+            .map((id: string) => parseInt(id.split('_')[1], 10));
 
-        const max = ids.length ? Math.max(...ids) : 0;
-        const next = (max + 1).toString().padStart(3, '0');
+          const max = ids.length ? Math.max(...ids) : 0;
+          const next = (max + 1).toString().padStart(3, '0');
 
-        this.form.patchValue({ deviceId: `ROOM_${next}` });
+          this.form.patchValue({ deviceId: `ROOM_${next}` });
+        });
+      }
+      
+      this.form.valueChanges.subscribe(val => {
+        sessionStorage.setItem('roomAddEditForm', JSON.stringify(val));
       });
     }
   }
@@ -84,6 +95,7 @@ export class RoomAddEditComponent implements OnInit {
             : 'Room created successfully!';
 
         if (this.mode === 'add') {
+          sessionStorage.removeItem('roomAddEditForm');
           const key = res?.deviceKey;
           setTimeout(() => {
             this.activeModal.close(true);

@@ -48,6 +48,23 @@ export class AddEditComponent implements OnInit {
       roomIds: [[]]
     });
 
+    const savedForm = sessionStorage.getItem('accountForm');
+    if (savedForm) {
+      try {
+        const parsed = JSON.parse(savedForm);
+        delete parsed.password;
+        delete parsed.confirmPassword;
+        this.form.patchValue(parsed);
+      } catch (e) {}
+    }
+
+    this.form.valueChanges.subscribe(val => {
+      const toSave = { ...val };
+      delete toSave.password;
+      delete toSave.confirmPassword;
+      sessionStorage.setItem('accountForm', JSON.stringify(toSave));
+    });
+
     this.isAddMode = !this.accountId;
     this.title = this.isAddMode ? 'Add Account' : 'Edit Account';
 
@@ -176,6 +193,7 @@ export class AddEditComponent implements OnInit {
         .pipe(first())
         .subscribe({
           next: () => {
+            sessionStorage.removeItem('accountForm');
             this.alertService.success('Account updated successfully', { keepAfterRouteChange: true });
             this.router.navigate(['/admin/accounts']);
           },
@@ -189,6 +207,7 @@ export class AddEditComponent implements OnInit {
         .pipe(first())
         .subscribe({
           next: () => {
+            sessionStorage.removeItem('accountForm');
             this.alertService.success('Account created successfully', { keepAfterRouteChange: true });
             this.router.navigate(['/admin/accounts']);
           },
