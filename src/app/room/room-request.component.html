@@ -15,12 +15,46 @@
                     <div class="card-body p-4 bg-light-soft">
                         <form [formGroup]="form" (ngSubmit)="onSubmit()">
                             <div class="mb-4">
-                                <label class="form-label fw-bold text-muted small text-uppercase">Room</label>
-                                <div class="p-3 bg-white border rounded-3 d-flex align-items-center">
-                                    <span class="material-icons text-primary me-2">meeting_room</span>
-                                    <span class="fw-semibold">{{roomName || 'Loading room info...'}}</span>
+                                <label class="form-label fw-bold text-muted small text-uppercase">Select Room</label>
+                                <div class="position-relative">
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <span class="material-icons text-primary">meeting_room</span>
+                                        </span>
+                                        <input type="text" class="form-control border-start-0 ps-0" 
+                                               placeholder="-- Search and choose a room --"
+                                               [(ngModel)]="searchQuery" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               (focus)="onInputFocus()"
+                                               (blur)="closeDropdownDelay()"
+                                               (input)="onSearchInput()"
+                                               [ngClass]="{ 'is-invalid': submitted && f.roomId.errors }">
+                                        <!-- Keep the hidden input to hold the actual value for the form -->
+                                        <input type="hidden" formControlName="roomId">
+                                        <div *ngIf="submitted && f.roomId.errors" class="invalid-feedback d-block">
+                                            Please select a room from the list.
+                                        </div>
+                                    </div>
+
+                                    <!-- Dropdown Menu -->
+                                    <div *ngIf="isDropdownOpen" class="position-absolute w-100 bg-white border rounded shadow mt-1" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                                        <div *ngIf="filteredRooms.length === 0" class="p-2 text-muted small text-center">
+                                            No rooms match your search.
+                                        </div>
+                                        <div *ngFor="let room of filteredRooms" 
+                                             class="p-2 border-bottom dropdown-item" 
+                                             style="cursor: pointer;"
+                                             (click)="selectRoom(room)">
+                                            <div class="fw-bold text-primary">{{room.roomName}}</div>
+                                            <div class="small text-muted">Room #{{room.roomNumber}} | Floor {{room.floor}}</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input type="hidden" formControlName="roomId">
+                                
+                                <div *ngIf="fetchingRooms" class="form-text small text-muted mt-1">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                    Loading available rooms...
+                                </div>
                             </div>
 
                             <div class="mb-4">
@@ -44,17 +78,35 @@
                             </div>
 
                             <div class="mb-4 animate-fade-in" *ngIf="f.requestType.value === 'TimeLimited'">
-                                <label class="form-label fw-bold text-muted small text-uppercase">Access Expiry</label>
-                                <div class="input-group shadow-sm">
-                                    <span class="input-group-text bg-white border-end-0">
-                                        <span class="material-icons text-muted">event_available</span>
-                                    </span>
-                                    <input type="datetime-local" formControlName="requestedExpiryDate" class="form-control border-start-0 ps-0" 
-                                           [min]="minDateTime"
-                                           [ngClass]="{ 'is-invalid': submitted && f.requestedExpiryDate.errors }">
-                                </div>
-                                <div *ngIf="submitted && f.requestedExpiryDate.errors" class="invalid-feedback d-block">
-                                    Expiry date is required for time-limited access.
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Start Time</label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <span class="material-icons text-muted">event_available</span>
+                                            </span>
+                                            <input type="datetime-local" formControlName="requestedStartDate" class="form-control border-start-0 ps-0" 
+                                                   [min]="minDateTime"
+                                                   [ngClass]="{ 'is-invalid': submitted && f.requestedStartDate.errors }">
+                                        </div>
+                                        <div *ngIf="submitted && f.requestedStartDate.errors" class="invalid-feedback d-block">
+                                            Start date is required for time-limited access.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">End Time</label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <span class="material-icons text-muted">event_busy</span>
+                                            </span>
+                                            <input type="datetime-local" formControlName="requestedExpiryDate" class="form-control border-start-0 ps-0" 
+                                                   [min]="minDateTime"
+                                                   [ngClass]="{ 'is-invalid': submitted && f.requestedExpiryDate.errors }">
+                                        </div>
+                                        <div *ngIf="submitted && f.requestedExpiryDate.errors" class="invalid-feedback d-block">
+                                            End date is required for time-limited access.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

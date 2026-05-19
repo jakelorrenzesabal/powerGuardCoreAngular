@@ -11,8 +11,13 @@ export class AccessRequestListComponent implements OnInit {
     requests: AccessRequest[] = [];
     loading = false;
     processingId: number | null = null;
-    searchTerm = '';
-    filterStatus = '';
+    private _searchTerm = sessionStorage.getItem('arl_searchTerm') || '';
+    get searchTerm() { return this._searchTerm; }
+    set searchTerm(value: string) { this._searchTerm = value; sessionStorage.setItem('arl_searchTerm', value); }
+
+    private _filterStatus = sessionStorage.getItem('arl_filterStatus') || '';
+    get filterStatus() { return this._filterStatus; }
+    set filterStatus(value: string) { this._filterStatus = value; sessionStorage.setItem('arl_filterStatus', value); }
 
     get filteredRequests() {
         return this.requests.filter(r => {

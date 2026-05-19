@@ -17,8 +17,13 @@ export class ListComponent implements OnInit {
     loadingInactive = false;
     selectedAccount: any = null;
     deactivateModal: any;
-    searchTerm: string = '';
-    inactiveSearchTerm: string = '';
+    private _searchTerm: string = sessionStorage.getItem('al_searchTerm') || '';
+    get searchTerm() { return this._searchTerm; }
+    set searchTerm(value: string) { this._searchTerm = value; sessionStorage.setItem('al_searchTerm', value); }
+    
+    private _inactiveSearchTerm: string = sessionStorage.getItem('al_inactiveSearchTerm') || '';
+    get inactiveSearchTerm() { return this._inactiveSearchTerm; }
+    set inactiveSearchTerm(value: string) { this._inactiveSearchTerm = value; sessionStorage.setItem('al_inactiveSearchTerm', value); }
     private searchSubject: Subject<string> = new Subject<string>();
     private inactiveSearchSubject: Subject<string> = new Subject<string>();
     currentAccount: any;

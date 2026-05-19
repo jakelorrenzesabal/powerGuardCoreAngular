@@ -203,7 +203,7 @@
                             <div class="search-box-wrapper w-100">
                                 <span class="material-icons">meeting_room</span>
                                 <input type="text" class="form-control" [(ngModel)]="logsFilter.roomName"
-                                    placeholder="Room name..." />
+                                    (ngModelChange)="saveLogsFilter()" placeholder="Room name..." />
                             </div>
                         </div>
 
@@ -213,7 +213,7 @@
                             <div class="search-box-wrapper w-100">
                                 <span class="material-icons">event_note</span>
                                 <input type="text" class="form-control" [(ngModel)]="logsFilter.event"
-                                    placeholder="e.g., room_activated, card_validated..." />
+                                    (ngModelChange)="saveLogsFilter()" placeholder="e.g., room_activated, card_validated..." />
                             </div>
                         </div>
                     </div>
@@ -223,8 +223,8 @@
                         <div class="col-md-5">
                             <label class="form-label">From Date & Time</label>
                             <div class="input-group">
-                                <input type="date" class="form-control" [(ngModel)]="logsFilter.startDate">
-                                <input type="time" class="form-control" [(ngModel)]="logsFilter.startTime">
+                                <input type="date" class="form-control" [(ngModel)]="logsFilter.startDate" (ngModelChange)="saveLogsFilter()">
+                                <input type="time" class="form-control" [(ngModel)]="logsFilter.startTime" (ngModelChange)="saveLogsFilter()">
                             </div>
                         </div>
 
@@ -232,8 +232,8 @@
                         <div class="col-md-5">
                             <label class="form-label">To Date & Time</label>
                             <div class="input-group">
-                                <input type="date" class="form-control" [(ngModel)]="logsFilter.endDate">
-                                <input type="time" class="form-control" [(ngModel)]="logsFilter.endTime">
+                                <input type="date" class="form-control" [(ngModel)]="logsFilter.endDate" (ngModelChange)="saveLogsFilter()">
+                                <input type="time" class="form-control" [(ngModel)]="logsFilter.endTime" (ngModelChange)="saveLogsFilter()">
                             </div>
                         </div>
 

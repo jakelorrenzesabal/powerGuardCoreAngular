@@ -6,6 +6,7 @@ export interface AccessRequest {
     roomId: number;
     roomName?: string;
     requestType: string;
+    requestedStartDate?: string;
     requestedExpiryDate?: string;
     status: string;
     reason?: string;
@@ -17,6 +18,7 @@ export interface AccessRequest {
 export interface CreateAccessRequest {
     roomId: number;
     requestType: string;
+    requestedStartDate?: string;
     requestedExpiryDate?: string;
     reason?: string;
 }

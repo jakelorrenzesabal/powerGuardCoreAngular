@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { first, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
@@ -13,16 +14,23 @@ import { RoomAddEditComponent } from './room-add-edit.component';
   templateUrl: 'room-list.component.html',
   styleUrls: ['room-list.component.css']
 })
-export class RoomListComponent implements OnInit {
+export class RoomListComponent implements OnInit, AfterViewInit {
   rooms: Room[] = [];
   filteredRooms: Room[] = [];
-  roomSearchTerm = '';
-  modalRoomSearchTerm = '';
+  private _roomSearchTerm = sessionStorage.getItem('rl_roomSearchTerm') || '';
+  get roomSearchTerm() { return this._roomSearchTerm; }
+  set roomSearchTerm(value: string) { this._roomSearchTerm = value; sessionStorage.setItem('rl_roomSearchTerm', value); this.filterRooms(); }
+
+  private _modalRoomSearchTerm = sessionStorage.getItem('rl_modalRoomSearchTerm') || '';
+  get modalRoomSearchTerm() { return this._modalRoomSearchTerm; }
+  set modalRoomSearchTerm(value: string) { this._modalRoomSearchTerm = value; sessionStorage.setItem('rl_modalRoomSearchTerm', value); }
   pendingRoomIds = new Set<number>();
 
   selectedRoom: any;
   attempts: any[] = [];
-  filterText = '';
+  private _filterText = sessionStorage.getItem('rl_filterText') || '';
+  get filterText() { return this._filterText; }
+  set filterText(value: string) { this._filterText = value; sessionStorage.setItem('rl_filterText', value); }
   unreadCounts: { [key: number]: number } = {};
   totalLogsCount = 0;
   roomLogCounts: { [key: string]: number } = {};
@@ -33,7 +41,7 @@ export class RoomListComponent implements OnInit {
   logs: RoomLog[] = [];
   loadingLogs = false;
   logsTitle = 'Room Activity Logs';
-  logsFilter = {
+  private _logsFilter = JSON.parse(sessionStorage.getItem('rl_logsFilter') || 'null') || {
     roomName: '',
     event: '',
     startDate: '',
@@ -41,6 +49,9 @@ export class RoomListComponent implements OnInit {
     endDate: '',
     endTime: ''
   };
+  get logsFilter() { return this._logsFilter; }
+  set logsFilter(value: any) { this._logsFilter = value; sessionStorage.setItem('rl_logsFilter', JSON.stringify(value)); }
+  saveLogsFilter() { sessionStorage.setItem('rl_logsFilter', JSON.stringify(this._logsFilter)); }
   currentRoomId?: number;
   currentLogView: 'room' | 'all' = 'room';
   logsModal: any;
@@ -51,7 +62,9 @@ export class RoomListComponent implements OnInit {
   unassignedAccounts: any[] = [];
   loadingAccounts = false;
   loadingUnassigned = false;
-  accountSearchTerm = '';
+  private _accountSearchTerm = sessionStorage.getItem('rl_accountSearchTerm') || '';
+  get accountSearchTerm() { return this._accountSearchTerm; }
+  set accountSearchTerm(value: string) { this._accountSearchTerm = value; sessionStorage.setItem('rl_accountSearchTerm', value); }
   showUnassigned = false;
   accountsModal: any;
   durationModal: any;
@@ -65,10 +78,16 @@ export class RoomListComponent implements OnInit {
     private alertService: AlertService,
     public accountService: AccountService,
     private modalService: NgbModal,
-    private accessRequestService: AccessRequestService
+    private accessRequestService: AccessRequestService,
+    private router: Router
   ) { }
 
   ngOnInit() {
+    if (this.accountService.accountValue?.role !== 'Admin') {
+       this.router.navigate(['/rooms/request']);
+       return;
+    }
+
     this.loadRooms();
     this.loadAllLogsCount();
     this.loadPendingRequests();
@@ -80,6 +99,44 @@ export class RoomListComponent implements OnInit {
       this.accountSearchTerm = searchTerm;
       this.loadUnassignedAccounts();
     });
+  }
+
+  ngAfterViewInit() {
+    // Clear active modal state when any modal is hidden
+    const modals = ['roomLogsModal', 'accountsByRoomModal', 'assignDurationModal', 'attemptsModal'];
+    modals.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('hidden.bs.modal', () => {
+          sessionStorage.removeItem('rl_activeModal');
+        });
+      }
+    });
+
+    // Restore active modal if exists
+    const savedModalStr = sessionStorage.getItem('rl_activeModal');
+    if (savedModalStr) {
+      try {
+        const savedModal = JSON.parse(savedModalStr);
+        setTimeout(() => {
+          if (savedModal.name === 'roomLogsModal') {
+            if (savedModal.data === 'all') {
+              this.showAllLogs(true);
+            } else {
+              this.showRoomLogs(savedModal.data, true);
+            }
+          } else if (savedModal.name === 'accountsByRoomModal') {
+            this.showAccountsByRoom();
+          } else if (savedModal.name === 'addRoom') {
+            if (!this.modalService.hasOpenModals()) {
+              this.openAddRoom();
+            }
+          }
+        }, 100); // small delay to let Angular finish initializing views
+      } catch (e) {
+        console.error('Error parsing saved modal state', e);
+      }
+    }
   }
 
   private loadPendingRequests() {
@@ -140,32 +197,54 @@ export class RoomListComponent implements OnInit {
             isTogglingPower: false
           }));
           this.filterRooms();
+
+          // Restore editRoom modal if needed
+          const savedModalStr = sessionStorage.getItem('rl_activeModal');
+          if (savedModalStr) {
+            try {
+              const savedModal = JSON.parse(savedModalStr);
+              if (savedModal.name === 'editRoom') {
+                const roomToEdit = this.rooms.find(r => r.roomId === savedModal.data);
+                if (roomToEdit && !this.modalService.hasOpenModals()) {
+                  this.openEditRoom(roomToEdit);
+                }
+              }
+            } catch (e) {}
+          }
         },
         error: (error: any) => this.alertService.error(error)
       });
   }
 
   openAddRoom() {
+    sessionStorage.setItem('rl_activeModal', JSON.stringify({ name: 'addRoom' }));
     const modalRef = this.modalService.open(RoomAddEditComponent, { size: 'lg' });
     modalRef.componentInstance.mode = 'add';
 
     modalRef.result.then((result: any) => {
+      sessionStorage.removeItem('rl_activeModal');
       if (result) {
         this.loadRooms(); // ✅ refresh table
       }
-    }).catch(() => { });
+    }).catch(() => {
+      sessionStorage.removeItem('rl_activeModal');
+    });
   }
 
   openEditRoom(room: any) {
+    sessionStorage.setItem('rl_activeModal', JSON.stringify({ name: 'editRoom', data: room.roomId }));
     const modalRef = this.modalService.open(RoomAddEditComponent, { size: 'lg' });
     modalRef.componentInstance.mode = 'edit';
     modalRef.componentInstance.room = room;
 
     modalRef.result.then((result: any) => {
+      sessionStorage.removeItem('rl_activeModal');
       if (result) {
         this.loadRooms(); // ✅ refresh table
       }
-    }).catch(() => { });
+    }).catch(() => {
+      sessionStorage.removeItem('rl_activeModal');
+    });
   }
 
   // ---------- LOGS ----------
@@ -249,9 +328,12 @@ export class RoomListComponent implements OnInit {
     }
   }
 
-  showAllLogs() {
+  showAllLogs(restore: boolean = false) {
+    sessionStorage.setItem('rl_activeModal', JSON.stringify({ name: 'roomLogsModal', data: 'all' }));
     this.logsTitle = 'All Activity Logs';
-    this.resetLogsFilter();
+    if (!restore) {
+      this.resetLogsFilter();
+    }
     this.loadAllLogs();
 
     const modalElement = document.getElementById('roomLogsModal');
@@ -261,9 +343,12 @@ export class RoomListComponent implements OnInit {
     }
   }
 
-  showRoomLogs(roomId: number) {
+  showRoomLogs(roomId: number, restore: boolean = false) {
+    sessionStorage.setItem('rl_activeModal', JSON.stringify({ name: 'roomLogsModal', data: roomId }));
     this.logsTitle = 'Room Activity Logs';
-    this.resetLogsFilter();
+    if (!restore) {
+      this.resetLogsFilter();
+    }
     this.loadRoomLogs(roomId);
 
     const modalElement = document.getElementById('roomLogsModal');
@@ -292,6 +377,7 @@ export class RoomListComponent implements OnInit {
 
   // ---------- ACCOUNTS ----------
   showAccountsByRoom() {
+    sessionStorage.setItem('rl_activeModal', JSON.stringify({ name: 'accountsByRoomModal' }));
     this.selectedRoomId = null;
     this.roomAccounts = [];
     this.modalRoomSearchTerm = '';
