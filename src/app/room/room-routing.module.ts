@@ -9,6 +9,7 @@ const routes: Routes = [
   { path: '', component: RoomListComponent },
   { path: 'add', component: RoomAddEditComponent },
   { path: 'edit/:roomId', component: RoomAddEditComponent },
+  { path: 'request', component: RoomRequestComponent },
   { path: 'request/:id', component: RoomRequestComponent },
 ];
 

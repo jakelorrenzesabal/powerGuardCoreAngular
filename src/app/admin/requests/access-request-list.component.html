@@ -25,6 +25,7 @@
                     <option value="">All Statuses</option>
                     <option value="Pending">Pending</option>
                     <option value="Approved">Approved</option>
+                    <option value="Scheduled">Scheduled</option>
                     <option value="Rejected">Rejected</option>
                     <option value="Expired">Expired</option>
                 </select>
@@ -59,6 +60,9 @@
                                     <span class="badge" [ngClass]="request.requestType === 'Permanent' ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'">
                                         {{request.requestType}}
                                     </span>
+                                    <div *ngIf="request.requestedStartDate" class="extra-small text-muted mt-1">
+                                        Start: {{request.requestedStartDate | date:'short'}}
+                                    </div>
                                     <div *ngIf="request.requestedExpiryDate" class="extra-small text-muted mt-1">
                                         Exp: {{request.requestedExpiryDate | date:'short'}}
                                     </div>
@@ -72,6 +76,7 @@
                                     <span class="status-pill" [ngClass]="{
                                         'status-pending': request.status === 'Pending',
                                         'status-approved': request.status === 'Approved',
+                                        'status-scheduled': request.status === 'Scheduled',
                                         'status-rejected': request.status === 'Rejected',
                                         'status-expired': request.status === 'Expired'
                                     }">

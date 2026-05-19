@@ -115,8 +115,15 @@ export class AddEditComponent implements OnInit {
       .filter(r => this.form.value.roomIds.includes(r.roomId))
       .map(r => {
         const existing = currentAssignments.find(ca => ca.roomId === r.roomId);
-        return { ...r, expiryDate: existing ? existing.expiryDate : null };
+        return { ...r, startDate: existing ? existing.startDate : null, expiryDate: existing ? existing.expiryDate : null };
       });
+  }
+
+  onStartChange(roomId: number, event: any) {
+    const room = this.selectedRooms.find(r => r.roomId === roomId);
+    if (room) {
+      room.startDate = event.target.value ? new Date(event.target.value).toISOString() : null;
+    }
   }
 
   onExpiryChange(roomId: number, event: any) {
@@ -124,6 +131,13 @@ export class AddEditComponent implements OnInit {
     if (room) {
       room.expiryDate = event.target.value ? new Date(event.target.value).toISOString() : null;
     }
+  }
+
+  getStartValue(startDate: any): string {
+    if (!startDate) return '';
+    const date = new Date(startDate);
+    // Format to yyyy-MM-ddThh:mm
+    return date.toISOString().substring(0, 16);
   }
 
   getExpiryValue(expiryDate: any): string {
@@ -142,9 +156,10 @@ export class AddEditComponent implements OnInit {
     // Prepare parameters
     const params = { ...this.form.value };
     
-    // Add room assignments with expiry
+    // Add room assignments with expiry and start date
     params.roomAssignments = this.selectedRooms.map(r => ({
       roomId: r.roomId,
+      startDate: r.startDate,
       expiryDate: r.expiryDate
     }));
     delete params.roomIds;

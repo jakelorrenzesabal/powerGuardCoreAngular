@@ -23,6 +23,11 @@
     color: #2e7d32;
 }
 
+.status-scheduled {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
 .status-rejected {
     background-color: #ffebee;
     color: #c62828;

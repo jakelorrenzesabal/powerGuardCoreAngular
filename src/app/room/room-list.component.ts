@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { first, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
@@ -65,10 +66,16 @@ export class RoomListComponent implements OnInit {
     private alertService: AlertService,
     public accountService: AccountService,
     private modalService: NgbModal,
-    private accessRequestService: AccessRequestService
+    private accessRequestService: AccessRequestService,
+    private router: Router
   ) { }
 
   ngOnInit() {
+    if (this.accountService.accountValue?.role !== 'Admin') {
+       this.router.navigate(['/rooms/request']);
+       return;
+    }
+
     this.loadRooms();
     this.loadAllLogsCount();
     this.loadPendingRequests();

@@ -110,20 +110,38 @@
             </div>
             <div class="expiry-setting mt-2 pt-2 border-top">
               <label class="form-label small text-muted mb-1">Access Duration</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-light">
-                  <span class="material-icons" style="font-size: 16px;">schedule</span>
-                </span>
-                <input type="datetime-local" class="form-control" [value]="getExpiryValue(room.expiryDate)"
-                  (change)="onExpiryChange(room.roomId, $event)" placeholder="Permanent access if blank">
-                <button type="button" class="btn btn-outline-secondary"
-                  (click)="onExpiryChange(room.roomId, {target: {value: ''}})" title="Clear expiry (Permanent)">
-                  Permanent
-                </button>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light" title="Start Time">
+                      <span class="material-icons" style="font-size: 16px;">event_available</span>
+                    </span>
+                    <input type="datetime-local" class="form-control" [value]="getStartValue(room.startDate)"
+                      (change)="onStartChange(room.roomId, $event)" title="Start Time" placeholder="Now if blank">
+                    <button type="button" class="btn btn-outline-secondary"
+                      (click)="onStartChange(room.roomId, {target: {value: ''}})" title="Clear start (Now)">
+                      Now
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light" title="End Time">
+                      <span class="material-icons" style="font-size: 16px;">event_busy</span>
+                    </span>
+                    <input type="datetime-local" class="form-control" [value]="getExpiryValue(room.expiryDate)"
+                      (change)="onExpiryChange(room.roomId, $event)" title="End Time" placeholder="Permanent if blank">
+                    <button type="button" class="btn btn-outline-secondary"
+                      (click)="onExpiryChange(room.roomId, {target: {value: ''}})" title="Clear expiry (Permanent)">
+                      Perm
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="form-text x-small mt-1">
-                {{ room.expiryDate ? 'Access expires at ' + (room.expiryDate | date:'medium') : 'Permanent access
-                granted' }}
+                {{ room.startDate ? 'Starts ' + (room.startDate | date:'medium') : 'Starts immediately' }} 
+                &middot; 
+                {{ room.expiryDate ? 'Expires ' + (room.expiryDate | date:'medium') : 'Permanent access' }}
               </div>
             </div>
           </div>
